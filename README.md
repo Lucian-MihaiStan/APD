@@ -1,5 +1,4 @@
 # APD
-
 Algoritmi Paraleli si Distribuiti - UPB 2019-2020
 
 Contine laboratoare, teme si testul practic de la final
@@ -7,9 +6,7 @@ Contine laboratoare, teme si testul practic de la final
 Temele vor fi incarcate pe *Git* **dupa deadline**
 
 ## Laboratoare
-
-- **Lab1**: introducere in `pthread.h` 
+1. Introducere in `pthread.h` 
 
 ## Teme
-
 ???

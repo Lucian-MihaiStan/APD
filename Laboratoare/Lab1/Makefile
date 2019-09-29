@@ -1,9 +1,12 @@
+CC=gcc
+CFLAGS=-lm -lpthread -O3
+
 .PHONY: build clean run
 
 build: helloWorld
 
 addVectors: addVectors.c
-	gcc -o $@ $^ -lm -O3 -lpthread
+	gcc -o $@ $^ $(CFLAGS)
 
 run: helloWorld
 	./helloWorld

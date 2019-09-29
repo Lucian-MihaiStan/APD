@@ -6,21 +6,21 @@
 
 void* threadFunction(void *var)
 {
-	int thread_id = *(int*)var;
+	int i, thread_id = *(int*)var;
 
-	for (int i = 1; i; --i)
+	for (i = 1; i; --i)
 	{
-		printf("Hello world from thread %i\n", thread_id);
+		printf("Hello world from thread %d\n", thread_id);
 	}
 }
 
 void* secondThread(void *var)
 {
-	int thread_id = *(int*)var;
+	int i, thread_id = *(int*)var;
 
-	for (int i = 1; i; --i)
+	for (i = 1; i; --i)
 	{
-		printf("Second function on thread %i\n", thread_id);
+		printf("Second function on thread %d\n", thread_id);
 	}
 }
 
@@ -33,16 +33,20 @@ int main(int argc, char **argv)
 
 	pthread_t tid[P];
 	int thread_id[P];
-	for(i = 0;i < P; i++)
+
+	for(i = 0; i < P; i++)
+	{
 		thread_id[i] = i;
+	}
 
 	// for(i = 0; i < P; i++) {
 	// 	pthread_create(&(tid[i]), NULL, threadFunction, &(thread_id[i]));
 	// }
-	pthread_create(&(tid[0]), NULL, threadFunction, &(thread_id[0]));
-	pthread_create(&(tid[1]), NULL, secondThread, &(thread_id[1]));
+	pthread_create(&tid[0], NULL, threadFunction, &thread_id[0]);
+	pthread_create(&tid[1], NULL, secondThread, &thread_id[1]);
 
-	for(i = 0; i < 2; i++) {
+	for(i = 0; i < 2; i++)
+	{
 		pthread_join(tid[i], NULL);
 	}
 

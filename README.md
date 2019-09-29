@@ -11,3 +11,6 @@ Temele vor fi incarcate pe *Git* **dupa deadline**
 
 ## Teme
 ???
+
+## Test
+Colocviul final

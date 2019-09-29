@@ -2,8 +2,8 @@
 
 build: helloWorld
 
-helloWorld: helloWorld.c
-	gcc -o helloWorld helloWorld.c -lm -O3 -lpthread
+addVectors: addVectors.c
+	gcc -o $@ $^ -lm -O3 -lpthread
 
 run: helloWorld
 	./helloWorld

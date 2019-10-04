@@ -7,7 +7,7 @@ DEBUG=-g
 build: helloWorld addVectors allCores raceCondition oneTwo
 
 addVectors: addVectors.c
-	$(CC) -o $@ $^ $(CFLAGS) $(DEBUG)
+	$(CC) -o $@ $^ $(CFLAGS)
 
 helloWorld: helloWorld.c
 	$(CC) -o $@ $^ $(CFLAGS) $(DEBUG) -O3

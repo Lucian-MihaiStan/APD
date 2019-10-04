@@ -51,10 +51,10 @@ int main(int argc, char **argv)
 
     for (i = 0; i < P - 1; i++)
     {
-        iters[i] = ceil(N / P);
+        iters[i] = ceil((double)N / P);
         pthread_create(&tid[i], NULL, race, iters + i);
     }
-    iters[P - 1] = N - ceil(N / P) * (P - 1);
+    iters[P - 1] = N - ceil((double)N / P) * (P - 1);
     pthread_create(&tid[P - 1], NULL, race, iters + P - 1);
 
     for (i = 0; i < P; i++)

@@ -13,11 +13,6 @@ int* a;
 int* b;
 int* c;
 
-typedef struct SUBVECTOR
-{
-    int start, end;
-} SUBVECTOR;
-
 void getArgs(int argc, char **argv)
 {
     if (argc < 5)
@@ -117,12 +112,15 @@ void print()
 
 void *addVectors(void* arg)
 {
-    SUBVECTOR v = *(SUBVECTOR*)arg;
+    int tid = *(int*)arg;
     int i, j;
+
+    int start = tid * ceil((double)N / P);
+    int end = MIN(N, (tid + 1) * ceil((double)N / P));
 
     for(j = 0; j < NReps; j++)
     {
-        for(i = v.start; i < v.end; i++)
+        for(i = start; i < end; i++)
         {
             c[i] = a[i] + b[i];
         }
@@ -137,7 +135,6 @@ int main(int argc, char *argv[])
 
     pthread_t tid[P];
     int thread_id[P];
-    SUBVECTOR v[P];
 
     for (i = 0; i < P; i++)
     {
@@ -146,10 +143,7 @@ int main(int argc, char *argv[])
 
     for (i = 0; i < P; i++)
     {
-        v[i].start = i * ceil(N / P);
-        v[i].end = MIN(N, (i + 1) * ceil(N / P));
-
-        pthread_create(&(tid[i]), NULL, addVectors, v + i);
+        pthread_create(&(tid[i]), NULL, addVectors, thread_id + i);
     }
 
     for (i = 0; i < P; i++)

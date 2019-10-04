@@ -11,12 +11,12 @@ void *race(void* arg)
 {
     int numIters = *(int*)arg, i;
 
-    pthread_mutex_lock(&mutex);
     for (i = 0; i < numIters; ++i)
     {
+        pthread_mutex_lock(&mutex);
         a += 2;
+        pthread_mutex_unlock(&mutex);
     }
-    pthread_mutex_unlock(&mutex);
 
     return NULL;
 }

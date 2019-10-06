@@ -52,6 +52,12 @@ run_mult_second: par_multiply_second
 run_mult_inner: par_multiply_inner
 	time ./$< $(N) $(NReps) $(printLevel) $(P) > par
 
+run_strassen_seq: seq_strassen
+	time ./$< $(N) $(NReps) $(printLevel) > true_strassen
+
+run_strassen_par: par_strassen
+	time ./$< $(N) $(NReps) $(printLevel) > par_strass
+
 test_mult_outer: seq_multiply par_multiply_outer
 	./testCorrectnessIntensive.sh $^ $(N) $(NReps) 1
 
@@ -61,6 +67,9 @@ test_mult_second: seq_multiply par_multiply_second
 test_mult_inner: seq_multiply par_multiply_inner
 	./testCorrectnessIntensive.sh $^ $(N) $(NReps) 1
 
+test_mult_strassen: seq_strassen par_strassen
+	./testCorrectnessIntensive.sh $^ $(N) $(NReps) 1
+
 clean:
-	rm -f seq_multiply par_multiply_outer par_multiply_second par_multiply_inner seq_strassen par_strassen raceCondition get_14 par true
+	rm -f seq_multiply par_multiply_outer par_multiply_second par_multiply_inner seq_strassen par_strassen raceCondition get_14 par par_strass true*
 

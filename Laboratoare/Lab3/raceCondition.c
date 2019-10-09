@@ -40,9 +40,9 @@ int main(int argc, char **argv)
         pthread_join(tid[i], NULL);
     }
 
-    // Teoretic minimul ar fi 2:
+    // Teoretic minimul ar fi 2000:
     // fiecare a += 2 se executa concomitent, la fiecare iteratie
-    // Acest lucru e extrem de improbabil
+    // Acest lucru e totusi extrem de improbabil
     printf("%d\n", a);
 
     return 0;

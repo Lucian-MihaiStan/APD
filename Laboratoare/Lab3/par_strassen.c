@@ -67,6 +67,18 @@ int ** allocMatrix(int n, int m)
     return(matrix);
 }
 
+void freeMatrix(int** mat, int n)
+{
+    int i;
+
+    for (i = 0; i < n; ++i)
+    {
+        free(mat[i]);
+    }
+
+    free(mat);
+}
+
 void init()
 {
     int i, j;
@@ -125,6 +137,30 @@ void init()
             }
         }
     }
+}
+
+void destroy()
+{
+    freeMatrix(a, N);
+    freeMatrix(b, N);
+    freeMatrix(c, N);
+    freeMatrix(M1, N);
+    freeMatrix(M2, N);
+    freeMatrix(M3, N);
+    freeMatrix(M4, N);
+    freeMatrix(M5, N);
+    freeMatrix(M6, N);
+    freeMatrix(M7, N);
+    freeMatrix(AUXM11, N);
+    freeMatrix(AUXM12, N);
+    freeMatrix(AUXM21, N);
+    freeMatrix(AUXM31, N);
+    freeMatrix(AUXM41, N);
+    freeMatrix(AUXM51, N);
+    freeMatrix(AUXM61, N);
+    freeMatrix(AUXM62, N);
+    freeMatrix(AUXM71, N);
+    freeMatrix(AUXM72, N);
 }
 
 void printAll()
@@ -385,6 +421,7 @@ int main(int argc, char *argv[])
     pthread_barrier_destroy(&barrier_C12);
     pthread_barrier_destroy(&barrier_C21);
     pthread_barrier_destroy(&barrier_C22);
+    destroy();
 
     return 0;
 }

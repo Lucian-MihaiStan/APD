@@ -44,6 +44,7 @@ int main(int argc, char **argv)
     // fiecare a += 2 se executa concomitent, la fiecare iteratie
     // Acest lucru e totusi extrem de improbabil
     printf("%d\n", a);
+    pthread_barrier_destroy(&b);
 
     return 0;
 }

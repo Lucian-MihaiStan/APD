@@ -12,8 +12,7 @@ int P;
 int** a;
 int** b;
 int** c;
-
-pthread_mutex_t mutex;
+pthread_mutex_t** m;
 
 void* threadFunction(void *args)
 {
@@ -39,9 +38,9 @@ void* threadFunction(void *args)
                     tmp += a[i][k] * b[k][j];
                 }
 
-                pthread_mutex_lock(&mutex);
+                pthread_mutex_lock(&m[i][j]);
                 c[i][j] += tmp;
-                pthread_mutex_unlock(&mutex);
+                pthread_mutex_unlock(&m[i][j]);
             }
         }
     }
@@ -68,14 +67,13 @@ void init()
     a = malloc(sizeof(int *) * N);
     b = malloc(sizeof(int *) * N);
     c = malloc(sizeof(int *) * N);
+    m = malloc(sizeof(pthread_mutex_t*) * N);
 
-    if (a == NULL || b == NULL || c == NULL)
+    if (a == NULL || b == NULL || c == NULL || m == NULL)
     {
         printf("malloc failed!");
         exit(1);
     }
-
-    pthread_mutex_init(&mutex, NULL);
 
     int i, j;
 
@@ -84,11 +82,17 @@ void init()
         a[i] = malloc(sizeof(int) * N);
         b[i] = malloc(sizeof(int) * N);
         c[i] = malloc(sizeof(int) * N);
+        m[i] = malloc(sizeof(pthread_mutex_t) * N);
 
-        if(a[i] == NULL || b[i] == NULL || c[i] == NULL)
+        if(a[i] == NULL || b[i] == NULL || c[i] == NULL || m[i] == NULL)
         {
             printf("malloc failed!");
             exit(1);
+        }
+
+        for (j = 0; j < N; ++j)
+        {
+            pthread_mutex_init(&m[i][j], NULL);
         }
     }
 
@@ -109,6 +113,30 @@ void init()
             }
         }
     }
+}
+
+void destroy()
+{
+    int i, j;
+
+    for (i = 0; i < N; ++i)
+    {
+        free(a[i]);
+        free(b[i]);
+        free(c[i]);
+
+        for (j = 0; j < N; ++j)
+        {
+            pthread_mutex_destroy(&m[i][j]);
+        }
+
+        free(m[i]);
+    }
+
+    free(a);
+    free(b);
+    free(c);
+    free(m);
 }
 
 void printAll()
@@ -169,7 +197,7 @@ int main(int argc, char *argv[])
     }
 
     print();
-    pthread_mutex_destroy(&mutex);
+    destroy();
 
     return 0;
 }

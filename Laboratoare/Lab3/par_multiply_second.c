@@ -110,19 +110,11 @@ void destroy()
         free(a[i]);
         free(b[i]);
         free(c[i]);
-
-        for (j = 0; j < N; ++j)
-        {
-            pthread_mutex_destroy(&m[i][j]);
-        }
-
-        free(m[i]);
     }
 
     free(a);
     free(b);
     free(c);
-    free(m);
 }
 
 void printAll()

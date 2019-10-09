@@ -103,6 +103,30 @@ void init()
     }
 }
 
+void destroy()
+{
+    int i, j;
+
+    for (i = 0; i < N; ++i)
+    {
+        free(a[i]);
+        free(b[i]);
+        free(c[i]);
+
+        for (j = 0; j < N; ++j)
+        {
+            pthread_mutex_destroy(&m[i][j]);
+        }
+
+        free(m[i]);
+    }
+
+    free(a);
+    free(b);
+    free(c);
+    free(m);
+}
+
 void printAll()
 {
     int i, j;
@@ -161,6 +185,7 @@ int main(int argc, char *argv[])
     }
 
     print();
+    destroy();
 
     return 0;
 }

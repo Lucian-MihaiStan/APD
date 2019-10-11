@@ -40,7 +40,7 @@ void getArgs(int argc, char **argv)
     printLevel = atoi(argv[3]);
 }
 
-int ** allocMatrix(int n, int m)
+int** allocMatrix(int n, int m)
 {
     int ** matrix;
     matrix = malloc(sizeof(int *) * n);

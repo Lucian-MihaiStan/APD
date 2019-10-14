@@ -29,11 +29,11 @@ void* bubbleSort(void* arg)
 
     int startEven   = start & 1 ? start + 1 : start;
     int endEven     = end & 1 ? end : end + 1;
-    endEven         = endEven > N - 1 ? N - 1 : endEven;
+    endEven         = MIN(N - 1, endEven);
 
     int startOdd    = start & 1 ? start : start + 1;
     int endOdd      = end & 1 ? end + 1 : end;
-    endOdd          = endOdd > N - 1 ? N - 1 : endOdd;
+    endOdd          = MIN(N - 1, endOdd);
 
     while (!sorted)
     {

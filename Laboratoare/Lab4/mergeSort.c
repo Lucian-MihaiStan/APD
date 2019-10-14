@@ -5,46 +5,15 @@
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-typedef struct
-{
-    int start, mid, end;
-    int *source, *destination;
-} args_t;
-
 int printLevel;
 int N;
+int P;
 int* v;
-int* vQSort;
 int* vNew;
 pthread_t* tid;
-args_t* args;
-
-void* mergeThread(void* arg) {
-    // DO NOT MODIFY
-    args_t* args = (args_t*)arg;
-
-    int start   = args->start;
-    int end     = args->end;
-    int mid     = args->mid;
-    int* src    = args->source;
-    int* dest   = args->destination;
-    int iA      = start;
-    int iB      = mid;
-    int i;
-
-    for (i = start; i < end; i++)
-    {
-        if (end == iB || (iA < mid && src[iA] <= src[iB]))
-        {
-            dest[i] = src[iA];
-            iA++;
-        } else
-        {
-            dest[i] = src[iB];
-            iB++;
-        }
-    }
-}
+int* threadID;
+pthread_barrier_t barrier;
+int changed;
 
 void merge(int source[], int start, int mid, int end, int destination[]) {
     // DO NOT MODIFY
@@ -81,14 +50,13 @@ void compareVectors(int * a, int * b) {
     printf("Sorted correctly\n");
 }
 
-void displayVector(int * v) {
+void displayVector(int* v) {
     // DO NOT MODIFY
     int i;
-    int displayWidth = 2 + log10(v[N - 1]);
 
     for (i = 0; i < N; i++)
     {
-        printf("%*i", displayWidth, v[i]);
+        printf("%d ", v[i]);
         
         if(!((i + 1) % 20))
         {
@@ -98,7 +66,7 @@ void displayVector(int * v) {
     printf("\n");
 }
 
-int cmp(const void *a, const void *b) {
+int cmp(const void* a, const void* b) {
     // DO NOT MODIFY
     int A = *(int*)a;
     int B = *(int*)b;
@@ -106,7 +74,7 @@ int cmp(const void *a, const void *b) {
     return A - B;
 }
 
-void getArgs(int argc, char **argv)
+void getArgs(int argc, char** argv)
 {
     if (argc < 3)
     {
@@ -114,21 +82,21 @@ void getArgs(int argc, char **argv)
         exit(1);
     }
 
-    N = atoi(argv[1]);
-    printLevel = atoi(argv[2]);
+    N           = atoi(argv[1]);
+    P           = atoi(argv[2]);
+    printLevel  = atoi(argv[3]);
 }
 
 void init()
 {
     int i;
 
-    v = malloc(sizeof(int) * N);
-    vQSort = malloc(sizeof(int) * N);
-    vNew = malloc(sizeof(int) * N);
-    tid = malloc(sizeof(pthread_t) * N);
-    args = malloc(sizeof(args_t) * N);
+    v           = malloc(sizeof(int) * N);
+    vNew        = malloc(sizeof(int) * N);
+    tid         = malloc(sizeof(pthread_t) * P);
+    threadID    = malloc(sizeof(int) * P);
 
-    if (v == NULL || vQSort == NULL || vNew == NULL || tid == NULL || args == NULL)
+    if (v == NULL || vNew == NULL || tid == NULL || threadID == NULL)
     {
         printf("malloc failed!");
         exit(1);
@@ -142,27 +110,27 @@ void init()
     {
         v[i] = rand() % N;
     }
+
+    pthread_barrier_init(&barrier, NULL, P);
 }
 
 void destroy(void)
 {
     free(v);
-    free(vQSort);
     free(vNew);
     free(tid);
-    free(args);
+    free(threadID);
+    pthread_barrier_destroy(&barrier);
 }
 
 void printPartial()
 {
-    compareVectors(v, vQSort);
+    displayVector(v);
 }
 
 void printAll()
 {
     displayVector(v);
-    displayVector(vQSort);
-    compareVectors(v, vQSort);
 }
 
 void print()
@@ -170,7 +138,9 @@ void print()
     if (printLevel == 0)
     {
         return;
-    } else if(printLevel == 1)
+    }
+
+    if(printLevel == 1)
     {
         printPartial();
     } else
@@ -179,52 +149,60 @@ void print()
     }
 }
 
+void* mergeSort(void* arg)
+{
+    int tid     = *(int*)arg;
+    int start   = tid * ceil((double)N / P);
+    int end     = MIN(N, (tid + 1) * ceil((double)N / P));
+
+    int i, width, *aux;
+
+    for (width = 1; width < N; width <<= 1)
+    {
+        if (end - start == width)
+        {
+            if ((end / width) & 1)
+            {
+                end -= width;
+            } else
+            {
+                start -= width;
+            }
+        }
+
+        for (i = start; i < end; i += (width * 2))
+        {
+            merge(v, i, i + width, i + 2 * width, vNew);
+        }
+
+        pthread_barrier_wait(&barrier);
+
+        if (changed == tid)
+        {
+            aux = v;
+            v = vNew;
+            vNew = aux;
+        }           
+
+        pthread_barrier_wait(&barrier);
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    int i, j;
+    int i;
     getArgs(argc, argv);
     init();
 
-    // make copy to check it against qsort
-    // DO NOT MODIFY
-    for(i = 0; i < N; i++)
+    for (i = 0; i != P; ++i)
     {
-        vQSort[i] = v[i];
+        threadID[i] = i;
+        pthread_create(tid + i, NULL, mergeSort, threadID + i);
     }
-    qsort(vQSort, N, sizeof(int), cmp);
 
-    int width, *aux;
-
-    for (width = 1; width < N; width = 2 * width)
+    for (i = 0; i != P; ++i)
     {
-        if (width >= N / 65536)
-        {
-            for (i = 0; i < N; i = i + 2 * width)
-            {
-                args[i].source      = v;
-                args[i].start       = i;
-                args[i].mid         = MIN(N, i + width);
-                args[i].end         = MIN(N, i + 2 * width);
-                args[i].destination = vNew;
-
-                pthread_create(tid + i, NULL, mergeThread, args + i);
-            }
-
-            for (i = 0; i < N; i = i + 2 * width)
-            {
-                pthread_join(tid[i], NULL);
-            }
-        } else
-        {
-            for (i = 0; i < N; i = i + 2 * width)
-            {
-                merge(v, i, MIN(N, i + width), MIN(N, i + 2 * width), vNew);
-            }
-        }       
-        
-        aux = v;
-        v = vNew;
-        vNew = aux;
+        pthread_join(tid[i], NULL);
     }
 
     print();

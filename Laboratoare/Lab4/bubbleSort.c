@@ -11,7 +11,6 @@ int printLevel;
 int N;
 int* v;
 int* vQSort;
-int* vNew;
 int* threadId;
 pthread_t* tid;
 
@@ -138,15 +137,10 @@ void init()
 
     v           = malloc(sizeof(int) * N);
     vQSort      = malloc(sizeof(int) * N);
-    vNew        = malloc(sizeof(int) * N);
     tid         = malloc(sizeof(pthread_t) * P);
     threadId    = malloc(sizeof(int) * P);
 
-    if (v == NULL
-        || vQSort == NULL
-        || vNew == NULL
-        || tid == NULL
-        || threadId == NULL)
+    if (v == NULL || vQSort == NULL || tid == NULL || threadId == NULL)
     {
         printf("malloc failed!");
         exit(1);
@@ -168,7 +162,6 @@ void destroy(void)
 {
     free(v);
     free(vQSort);
-    free(vNew);
     free(tid);
     free(threadId);
     pthread_barrier_destroy(&barrier);

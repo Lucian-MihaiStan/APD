@@ -166,11 +166,11 @@ void* fourierTransform(void* arg)
 {
     args_t* args = (args_t*)arg;
 
-    int threadID                = args->threadID;
-    int N                       = args->N;
-    int numThreads              = args->numThreads;
-    double* x                   = args->x;
-    double complex* X           = args->X;
+    int threadID        = args->threadID;
+    int N               = args->N;
+    int numThreads      = args->numThreads;
+    double* x           = args->x;
+    double complex* X   = args->X;
 
     int start   = threadID * ceil((double)N / numThreads);
     int end     = MIN(N, (threadID + 1) * ceil((double)N / numThreads));
@@ -201,11 +201,11 @@ int main(int argc, char** argv)
     retVal = getArgs(argc, argv, &inputFile, &outputFile, &numThreads);
     ASSERT(retVal != STATUS_OK, " ", retVal);
 
-    int N                   = 0;
-    double* x               = NULL;
-    double complex* X       = NULL;
-    pthread_t* tids         = NULL;
-    args_t* args            = NULL;
+    int N               = 0;
+    double* x           = NULL;
+    double complex* X   = NULL;
+    pthread_t* tids     = NULL;
+    args_t* args        = NULL;
 
     retVal = getInput(inputFile, &x, &N);
     ASSERT(retVal != STATUS_OK, " ", retVal);

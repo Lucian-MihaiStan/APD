@@ -20,7 +20,7 @@ void* bubbleSort(void* arg)
 {
     int i, aux;
 
-    int id         = *(int*)arg;
+    int id          = *(int*)arg;
     int srt         = 0;
 
     int start       = id * ceil((double)N / P);

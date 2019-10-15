@@ -2,11 +2,12 @@ CC=gcc
 CFLAGS=-lpthread -lm
 
 NBubble=100000
-NMerge=10000000
+NMerge=67108864
 NShear=5000
 NReps=1
 printLevel=0
 P=12 # sarakilor
+PMerge=8
 
 .PHONY: clean all
 
@@ -31,7 +32,7 @@ run_two_sorts: two_sorts
 	./$<
 
 run_mergeSort: mergeSort
-	time ./$< $(NMerge) $(printLevel)
+	time ./$< $(NMerge) $(PMerge) $(printLevel)
 
 run_bubbleSort: bubbleSort
 	time ./$< $(NBubble) $(P) $(printLevel)

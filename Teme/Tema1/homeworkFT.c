@@ -75,7 +75,7 @@ STATUS getArgs(
     return STATUS_OK;
 }
 
-STATUS getInput(char* inputFile, double** x, int* n)
+STATUS getInput(char* inputFile, double** x, int* N)
 {
     int retVal  = 0;
     FILE *input = fopen(inputFile, "rt");
@@ -85,17 +85,17 @@ STATUS getInput(char* inputFile, double** x, int* n)
         STATUS_INPUT_ERROR
     );
 
-    retVal = fscanf(input, "%d", n);
+    retVal = fscanf(input, "%d", N);
     ASSERT(retVal != 1, "Unable to read from inputFile.\n", STATUS_INPUT_ERROR);
 
-    *x = malloc(*n * sizeof(double));
+    *x = malloc(*N * sizeof(double));
     ASSERT(
         *x == NULL,
         "Unable to allocate memory for input.\n",
         STATUS_ALLOCATION_FAIL
     );
 
-    for (int i = 0; i != *n; ++i)
+    for (int i = 0; i != *N; ++i)
     {
         retVal = fscanf(input, "%lf", (*x) + i);
         ASSERT(

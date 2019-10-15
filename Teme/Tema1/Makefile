@@ -3,9 +3,9 @@ CFLAGS=-lm -lpthread
 WARNS=-Wall -Wextra -Wpedantic
 OPT=-O0
 
-inputFile=ft1.data.in
+inputFile=ft3.data.in
 trueOutput=ft1.data_out
-outputFile=ft1.data.out
+outputFile=ft3.data.out
 numThreads=12
 seed=42
 newInputFile=ft3.data.in
@@ -36,7 +36,7 @@ run_diff: compareOutputs
 	./$< $(trueOutput) $(outputFile)
 
 run_inputGen: inputGenerator
-	./$< $(N) $(newInputFile) $(seed)
+	./$< $(NPow2) $(newInputFile) $(seed)
 
 clean:
 	rm -f homeworkFFT homeworkFT inputGenerator compareOutputs *.out

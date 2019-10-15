@@ -38,6 +38,7 @@ void* bubbleSort(void* arg)
     while (!sorted)
     {
         pthread_barrier_wait(&barrier);
+        sorted = 1;
         srt = 1;
 
         for (i = startEven; i < endEven; i += 2)
@@ -51,8 +52,6 @@ void* bubbleSort(void* arg)
                 srt = 0;
             }
         }
-
-        sorted = 1;
 
         pthread_barrier_wait(&barrier);
 
@@ -77,7 +76,7 @@ void* bubbleSort(void* arg)
     }
 }
 
-void compareVectors(int * a, int * b)
+void compareVectors(int* a, int* b)
 {
     // DO NOT MODIFY
     int i;
@@ -111,7 +110,7 @@ void displayVector(int * v)
     printf("\n");
 }
 
-int cmp(const void *a, const void *b)
+int cmp(const void* a, const void* b)
 {
     // DO NOT MODIFY
     int A = *(int*)a;
@@ -120,7 +119,7 @@ int cmp(const void *a, const void *b)
     return A - B;
 }
 
-void getArgs(int argc, char **argv)
+void getArgs(int argc, char** argv)
 {
     if (argc < 4)
     {
@@ -192,7 +191,9 @@ void print()
     if (printLevel == 0)
     {
         return;
-    } else if (printLevel == 1)
+    }
+
+    if (printLevel == 1)
     {
         printPartial();
     } else
@@ -218,16 +219,16 @@ int main(int argc, char *argv[])
     // sort the vector v
     // PARALLELIZE ME
 
-    // for (i = 0; i < P; ++i)
-    // {
-    //     threadId[i] = i;
-    //     pthread_create(tid + i, NULL, bubbleSort, threadId + i);
-    // }
+    for (i = 0; i < P; ++i)
+    {
+        threadId[i] = i;
+        pthread_create(tid + i, NULL, bubbleSort, threadId + i);
+    }
 
-    // for (i = 0; i < P; ++i)
-    // {
-    //     pthread_join(tid[i], NULL);
-    // }
+    for (i = 0; i < P; ++i)
+    {
+        pthread_join(tid[i], NULL);
+    }
 
     print();
     destroy();

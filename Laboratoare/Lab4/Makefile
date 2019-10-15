@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-lpthread -lm
 
 NBubble=100000
-NMerge=67108864
+NMerge=67100000
 NShear=5000
 NReps=1
 printLevel=0

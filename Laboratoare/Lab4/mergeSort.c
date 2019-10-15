@@ -2,13 +2,16 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <math.h>
+#include <limits.h>
 
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 int printLevel;
 int N;
+int NPad;
 int P;
 int* v;
+int* vQSort;
 int* vNew;
 pthread_t* tid;
 int* threadID;
@@ -66,7 +69,8 @@ void displayVector(int* v) {
     printf("\n");
 }
 
-int cmp(const void* a, const void* b) {
+int cmp(const void* a, const void* b)
+{
     // DO NOT MODIFY
     int A = *(int*)a;
     int B = *(int*)b;
@@ -85,14 +89,17 @@ void getArgs(int argc, char** argv)
     N           = atoi(argv[1]);
     P           = atoi(argv[2]);
     printLevel  = atoi(argv[3]);
+
+    for (NPad = 1; NPad < N; NPad <<= 1);
 }
 
 void init()
 {
     int i;
 
-    v           = malloc(sizeof(int) * N);
-    vNew        = malloc(sizeof(int) * N);
+    v           = malloc(sizeof(int) * NPad);
+    vNew        = malloc(sizeof(int) * NPad);
+    vQSort      = malloc(sizeof(int) * NPad);
     tid         = malloc(sizeof(pthread_t) * P);
     threadID    = malloc(sizeof(int) * P);
 
@@ -111,6 +118,11 @@ void init()
         v[i] = rand() % N;
     }
 
+    for (; i < NPad; ++i)
+    {
+        v[i] = INT_MAX;
+    }
+
     pthread_barrier_init(&barrier, NULL, P);
 }
 
@@ -125,12 +137,14 @@ void destroy(void)
 
 void printPartial()
 {
-    displayVector(v);
+    compareVectors(v, vQSort);
 }
 
 void printAll()
 {
     displayVector(v);
+    displayVector(vQSort);
+    compareVectors(v, vQSort);
 }
 
 void print()
@@ -152,12 +166,12 @@ void print()
 void* mergeSort(void* arg)
 {
     int tid     = *(int*)arg;
-    int start   = tid * ceil((double)N / P);
-    int end     = MIN(N, (tid + 1) * ceil((double)N / P));
+    int start   = tid * ceil((double)NPad / P);
+    int end     = MIN(NPad, (tid + 1) * ceil((double)NPad / P));
 
     int i, width, *aux;
 
-    for (width = 1; width < N; width <<= 1)
+    for (width = 1; width < NPad; width <<= 1)
     {
         if (end - start == width)
         {
@@ -170,9 +184,9 @@ void* mergeSort(void* arg)
             }
         }
 
-        for (i = start; i < end; i += (width * 2))
+        for (i = start; i < end; i += width << 1)
         {
-            merge(v, i, i + width, i + 2 * width, vNew);
+            merge(v, i, i + width, i + (width << 1), vNew);
         }
 
         pthread_barrier_wait(&barrier);
@@ -193,6 +207,12 @@ int main(int argc, char *argv[])
     int i;
     getArgs(argc, argv);
     init();
+
+    // for(i = 0; i < N; i++)
+    // {
+    //     vQSort[i] = v[i];
+    // }
+    // qsort(vQSort, N, sizeof(int), cmp);
 
     for (i = 0; i != P; ++i)
     {

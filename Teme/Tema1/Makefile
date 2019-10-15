@@ -10,6 +10,7 @@ numThreads=12
 seed=42
 newInputFile=ft3.data.in
 N=1000000
+NPow2=1048576
 
 all: homeworkFT homeworkFFT inputGenerator compareOutputs
 

@@ -76,7 +76,7 @@ STATUS getArgs(
     return STATUS_OK;
 }
 
-STATUS getInput(char* inputFile, double complex** x, int* n)
+STATUS getInput(char* inputFile, double complex** x, int* N)
 {
     int retVal  = 0;
     double inputVal;
@@ -88,17 +88,17 @@ STATUS getInput(char* inputFile, double complex** x, int* n)
         STATUS_INPUT_ERROR
     );
 
-    retVal = fscanf(input, "%d", n);
+    retVal = fscanf(input, "%d", N);
     ASSERT(retVal != 1, "Unable to read from inputFile.\n", STATUS_INPUT_ERROR);
 
-    *x = malloc(*n * sizeof(double complex));
+    *x = malloc(*N * sizeof(double complex));
     ASSERT(
         *x == NULL,
         "Unable to allocate memory for input.\n",
         STATUS_ALLOCATION_FAIL
     );
 
-    for (int i = 0; i != *n; ++i)
+    for (int i = 0; i != *N; ++i)
     {
         retVal = fscanf(input, "%lf", &inputVal);
         ASSERT(
@@ -196,50 +196,124 @@ void* fourierTransform(void* arg)
     return NULL;
 }
 
-void* fastFourierTransform(void* arg)
-{
-    // args_t* args = (args_t*)arg;
+int bitReverse(int x, int log2N) 
+{ 
+    int n = 0; 
 
-    // int threadID                = args->threadID;
-    // int N                       = args->N;
-    // int numThreads              = args->numThreads;
-    // double* x                   = args->x;
-    // double complex* X           = args->X;
-    // pthread_barrier_t* barrier  = args->barrier;
-
-    // muie PGP
-
-    return NULL;
-}
-
-void _fft(double complex* buf, double complex* out, int N, int step)
-{
-    if (step >= N)
-    {
-        return;
+    for (int i = 0; i != log2N; ++i) 
+    { 
+        n <<= 1; 
+        n |= x & 1; 
+        x >>= 1; 
     }
 
-    _fft(out, buf, N, step << 1);
-    _fft(out + step, buf + step, N, step << 1);
-
-    double complex t;
-
-    for (int i = 0; i < N; i += step << 1)
-    {
-        t                   = cexp(-I * PI * i / N) * out[i + step];
-        buf[i >> 1]         = out[i] + t;
-        buf[(i + N) >> 1]   = out[i] - t;
-    }
+    return n; 
 }
- 
+
 void fft(double complex* x, double complex* X, int N)
 {
+    int cn = N;
+    int log2N;
+
+    for (log2N = 0; cn != 1; cn >>= 1, ++log2N);
+ 
     for (int i = 0; i != N; ++i)
     {
-        X[i] = x[i];
+        X[i] = x[bitReverse(i, log2N)];
     }
+
+    double complex w, wm, temp, aux;
+    int mid;
+
+    for (int width = 2; width <= N; width <<= 1)
+    {
+        mid = width >> 1;
+        w = 1.0 + 0.0 * I;
+        wm = cexp(-I * (M_PI / mid));
+
+        for (int i = 0; i != mid; ++i, w *= wm)
+        {
+            for (int j = i; j < N; j += width)
+            {
+                temp        = w * X[j + mid];
+                aux         = X[j];
+
+                X[j]        = aux + temp;
+                X[j + mid]  = aux - temp;
+            }
+        }
+    }
+}
+
+void* fastFourierTransform(void* arg)
+{
+    args_t* args = (args_t*)arg;
+
+    int threadID                = args->threadID;
+    int N                       = args->N;
+    int numThreads              = args->numThreads;
+    double complex* x           = args->x;
+    double complex* X           = args->X;
+    pthread_barrier_t* barrier  = args->barrier;
+
+    int start   = threadID * ceil((double)N / numThreads);
+    int end     = MIN(N, (threadID + 1) * ceil((double)N / numThreads));
+
+    int cN, log2N;
+
+    for (log2N = 0, cN = N; cN != 1; cN >>= 1, ++log2N);
  
-    _fft(x, X, N, 1);
+    for (int i = start; i != end; ++i)
+    {
+        X[i] = x[bitReverse(i, log2N)];
+    }
+
+    // printf("Reached barrier 1\n");
+
+    double complex w, wm, temp;
+    int mid, pos;
+
+    for (int width = 2; width <= N; width <<= 1)
+    {
+        mid = width >> 1;
+        wm = cexp(-I * (M_PI / mid));
+
+        // printf("width = %d; mid = %d\n", width, mid);
+
+        if (end - start == mid)
+        {
+            if ((end / mid) & 1)
+            {
+                end -= mid;
+            } else
+            {
+                start -= mid;
+            }
+        }
+        // start = start / width * width;
+        // end = end / width * width;
+
+        for (int i = start; i < end; i += width, w *= wm)
+        {
+            w = 1.0 + 0.0 * I;
+
+            for (int j = 0; j < mid; ++j, w *= wm)
+            {
+                pos = i + j;
+                temp = w * X[pos + mid];
+
+                X[pos + mid] = X[pos] - temp;
+                X[pos] += temp;
+            }
+        }    
+
+        if (width >= N / numThreads)
+        {
+            pthread_barrier_wait(barrier);
+        }
+    }
+
+    return NULL;
 }
 
 int main(int argc, char** argv)
@@ -268,25 +342,26 @@ int main(int argc, char** argv)
 
     pthread_barrier_init(&barrier, NULL, numThreads);
 
-    fft(x, X, N);
+    //fft(x, X, N);
 
-    // for (int i = 0; i != numThreads; ++i)
-    // {
-    //     args[i].threadID    = i;
-    //     args[i].N           = N;
-    //     args[i].numThreads  = numThreads;
-    //     args[i].x           = x;
-    //     args[i].X           = X;
+    for (int i = 0; i != numThreads; ++i)
+    {
+        args[i].threadID    = i;
+        args[i].N           = N;
+        args[i].numThreads  = numThreads;
+        args[i].x           = x;
+        args[i].X           = X;
+        args[i].barrier     = &barrier;
 
-    //     pthread_create(tids + i, NULL, fourierTransform, args + i);
-    // }
+        pthread_create(tids + i, NULL, fastFourierTransform, args + i);
+    }
 
-    // for (int i = 0; i != numThreads; ++i)
-    // {
-    //     pthread_join(tids[i], NULL);
-    // }
+    for (int i = 0; i != numThreads; ++i)
+    {
+        pthread_join(tids[i], NULL);
+    }
 
-    retVal = printOutput(outputFile, x, N);
+    retVal = printOutput(outputFile, X, N);
     ASSERT(retVal != STATUS_OK, " ", retVal);
 
     free(inputFile);

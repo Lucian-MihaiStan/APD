@@ -11,7 +11,7 @@ PMerge=8
 
 .PHONY: clean all
 
-all: two_sorts mergeSort parShear seqShear
+all: two_sorts mergeSort parShear seqShear bubbleSort
 
 two_sorts: two_sorts.c
 	$(CC) $? -o $@ $(CFLAGS)

@@ -16,7 +16,6 @@ int* vNew;
 pthread_t* tid;
 int* threadID;
 pthread_barrier_t barrier;
-int changed;
 
 void merge(int source[], int start, int mid, int end, int destination[]) {
     // DO NOT MODIFY
@@ -191,7 +190,7 @@ void* mergeSort(void* arg)
 
         pthread_barrier_wait(&barrier);
 
-        if (changed == tid)
+        if (!tid)
         {
             aux = v;
             v = vNew;

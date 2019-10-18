@@ -6,7 +6,7 @@ NMerge=67100000
 NShear=5000
 NReps=1
 printLevel=0
-P=8 # sarakilor
+P=12 # sarakilor
 PMerge=8
 
 .PHONY: clean all

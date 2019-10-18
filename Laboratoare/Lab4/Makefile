@@ -6,7 +6,7 @@ NMerge=67100000
 NShear=5000
 NReps=1
 printLevel=0
-P=12 # sarakilor
+P=8 # sarakilor
 PMerge=8
 
 .PHONY: clean all
@@ -44,5 +44,5 @@ run_parShear: parShear
 	time ./$< $(NShear) $(P) $(printLevel) > par
 
 clean:
-	rm -f two_sorts mergeSort bubbleSort parShear seqShear
+	rm -f two_sorts mergeSort bubbleSort parShear seqShear par seq
 

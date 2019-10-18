@@ -175,7 +175,7 @@ void sort_cols(int** x)
 
 void shearSort(void)
 {
-    int i, lim = log2(N) + 1;
+    int i, lim = log2(N) + 2;
 
     while (lim--)
     {

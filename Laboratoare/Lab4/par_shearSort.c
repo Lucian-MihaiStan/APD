@@ -197,7 +197,7 @@ void sort_cols(int start, int end)
 void* shearSort(void* args)
 {
     int id      = *(int*)args;
-    int lim     = log2(N) + 1;
+    int lim     = log2(N) + 2;
     int start   = id * ceil((double)N / P);
     int end     = MIN(N, (id + 1) * ceil((double)N / P));
 

@@ -38,11 +38,11 @@ run_bubbleSort: bubbleSort
 	time ./$< $(NBubble) $(P) $(printLevel)
 
 run_seqShear: seqShear
-	time ./$< $(NShear) $(printLevel) > seq
+	time ./$< $(NShear) $(printLevel)
 
 run_parShear: parShear
-	time ./$< $(NShear) $(P) $(printLevel) > par
+	time ./$< $(NShear) $(P) $(printLevel)
 
 clean:
-	rm -f two_sorts mergeSort bubbleSort parShear seqShear par seq
+	rm -f two_sorts mergeSort bubbleSort parShear seqShear
 

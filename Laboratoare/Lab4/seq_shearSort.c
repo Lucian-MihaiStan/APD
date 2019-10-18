@@ -47,7 +47,7 @@ void init()
     {
         for (j = 0; j < N; j++)
         {
-            m[i][j] = rand() % N * N;
+            m[i][j] = rand() % (N * N);
         }
     }
 }

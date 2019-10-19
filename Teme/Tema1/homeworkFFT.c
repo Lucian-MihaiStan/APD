@@ -236,11 +236,10 @@ void* recursiveFFT(void* arg)
         nextArgs[1].buffer = output + step;
 
         if ((step == 1 && numThreads > 1)
-            || (step == 2 && numThreads == 4)
             || (step == 2 && numThreads == 4))
         {
             // Se va crea un thread pentru unul dintre apelurile recursive, iar
-            // celalalt apel se executa pe threadul curent (main)
+            // celalalt apel se executa pe threadul curent (secvential)
             pthread_create(&tid, NULL, recursiveFFT, &nextArgs);
             recursiveFFT(nextArgs + 1);
 

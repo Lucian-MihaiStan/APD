@@ -13,8 +13,8 @@ public class Main {
 	}
 
     public static void main(String[] args) {
-        int M = 9;
-        int numThreads = 2;
+        final int M = 9;
+        final int numThreads = 2;
         int[][] graph = { { 0, 1, M, M, M },
                           { 1, 0, 1, M, M },
                           { M, 1, 0, 1, 1 },
@@ -53,6 +53,5 @@ public class Main {
 		printMatrix(graph, 5);
 		System.out.println();
 		printMatrix(parGraph, 5);
-
     }
 }

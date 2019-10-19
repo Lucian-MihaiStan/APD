@@ -5,6 +5,7 @@
 #include <string.h>
 #include <complex.h>
 
+
 /**
     Verifica o conditie si daca aceasta este indeplinita, se returneaza valoarea
     specificata.
@@ -41,10 +42,11 @@ typedef enum
 */
 typedef struct
 {
+    int step, N, numThreads;
     double complex* output;
     double complex* buffer;
-    int step, N, numThreads;
 } THREAD_ARGS;
+
 
 /**
     Parseaza argumentele primite de program si le salveaza in variabile.
@@ -87,7 +89,7 @@ STATUS getArgs(
 }
 
 /**
-    Citeste valorile de intrare din fisierul aferent.
+    Citeste datele de intrare din fisierul de input.
 */
 STATUS getInput(char* inputFile, double complex** x, int* N)
 {

@@ -47,6 +47,7 @@ typedef struct
     double complex* X;
 } THREAD_ARGS;
 
+
 /**
     Parseaza argumentele primite de program si le salveaza in variabile.
 */
@@ -88,7 +89,7 @@ STATUS getArgs(
 }
 
 /**
-    Citeste valorile de intrare din fisierul aferent.
+    Citeste datele de intrare din fisierul de input.
 */
 STATUS getInput(char* inputFile, double** x, int* N)
 {

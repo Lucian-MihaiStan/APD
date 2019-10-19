@@ -25,6 +25,10 @@ hs_err_pid*
 # Prerequisites
 *.d
 
+# Intellij garbage
+.idea
+*.iml
+
 # Object files
 *.o
 *.ko

@@ -1,16 +1,16 @@
 CC=gcc
 CFLAGS=-lm -lpthread
-WARNS=-Wall -Wextra -Wpedantic
-OPT=-O0
+WARNS=-Wall -Wextra
+OPT=-O3
 
-inputFile=ft4.data.in
+inputFile=ft3.data.in
 trueOutput=ft3.data_out
-outputFile=ft4.data.out
+outputFile=ft3.data.out
 numThreads=12
 numThreadsFFT=4
 seed=42
 newInputFile=ft4.data.in
-N=1000
+N=10000
 NPow2=67108864
 
 all: homeworkFT homeworkFFT inputGenerator compareOutputs

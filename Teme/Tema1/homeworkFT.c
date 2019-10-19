@@ -6,6 +6,10 @@
 #include <complex.h>
 
 
+/**
+    Verifica o conditie si daca aceasta este indeplinita, se returneaza valoarea
+    specificata.
+*/
 #define ASSERT(condition, msg, retVal)          \
     do                                          \
     {                                           \
@@ -16,10 +20,13 @@
         }                                       \
     } while (0)
 
+/* In loc de fmin */
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-#define PI (3.1415926535897)
-
+/**
+    Colectie de valori ce vor fi returnate de functiile programului pentru
+    diferite scenarii de apelare.
+*/
 typedef enum
 {
     STATUS_OK,
@@ -30,14 +37,19 @@ typedef enum
     STATUS_OUTPUT_ERROR
 } STATUS;
 
+/**
+    Parametrii ce vor fi pasati unui thread.
+*/
 typedef struct
 {
     int threadID, N, numThreads;
     double* x;
     double complex* X;
-} args_t;
+} THREAD_ARGS;
 
-
+/**
+    Parseaza argumentele primite de program si le salveaza in variabile.
+*/
 STATUS getArgs(
     int argc,
     char** argv,
@@ -67,7 +79,7 @@ STATUS getArgs(
 
     *numThreads = atoi(argv[3]);
     ASSERT(
-        *numThreads == 0,
+        *numThreads <= 0,
         "Incorrect numThreads.\n",
         STATUS_INCORRECT_ARGS
     );
@@ -75,9 +87,14 @@ STATUS getArgs(
     return STATUS_OK;
 }
 
+/**
+    Citeste valorile de intrare din fisierul aferent.
+*/
 STATUS getInput(char* inputFile, double** x, int* N)
 {
     int retVal  = 0;
+    int n       = 0;
+
     FILE *input = fopen(inputFile, "rt");
     ASSERT(
         input == NULL,
@@ -85,8 +102,9 @@ STATUS getInput(char* inputFile, double** x, int* N)
         STATUS_INPUT_ERROR
     );
 
-    retVal = fscanf(input, "%d", N);
+    retVal = fscanf(input, "%d", &n);
     ASSERT(retVal != 1, "Unable to read from inputFile.\n", STATUS_INPUT_ERROR);
+    *N = n;
 
     *x = malloc(*N * sizeof(double));
     ASSERT(
@@ -95,7 +113,7 @@ STATUS getInput(char* inputFile, double** x, int* N)
         STATUS_ALLOCATION_FAIL
     );
 
-    for (int i = 0; i != *N; ++i)
+    for (int i = 0; i != n; ++i)
     {
         retVal = fscanf(input, "%lf", (*x) + i);
         ASSERT(
@@ -110,10 +128,13 @@ STATUS getInput(char* inputFile, double** x, int* N)
     return STATUS_OK;
 }
 
+/**
+    Aloca vectorii auxiliari folosit de DFT.
+*/
 STATUS allocVectors(
     double complex** X,
     pthread_t** tids,
-    args_t** args,
+    THREAD_ARGS** args,
     int N,
     int numThreads)
 {
@@ -131,7 +152,7 @@ STATUS allocVectors(
         STATUS_ALLOCATION_FAIL
     );
 
-    *args = malloc(numThreads * sizeof(args_t));
+    *args = malloc(numThreads * sizeof(THREAD_ARGS));
     ASSERT(
         *args == NULL,
         "Unable to allocate memory for thread args.\n",
@@ -141,6 +162,9 @@ STATUS allocVectors(
     return STATUS_OK;
 }
 
+/**
+    Afiseaza valorile calculate de DFT.
+*/
 STATUS printOutput(char* outputFile, double complex* X, int N)
 {
     FILE* output = fopen(outputFile, "wt");
@@ -154,7 +178,7 @@ STATUS printOutput(char* outputFile, double complex* X, int N)
 
     for (int i = 0; i != N; ++i)
     {
-        fprintf(output, "%lf %lf\n", creal(X[i]), cimag(X[i]));
+        fprintf(output, "%.3lf %.3lf\n", creal(X[i]), cimag(X[i]));
     }
 
     fclose(output);
@@ -162,9 +186,32 @@ STATUS printOutput(char* outputFile, double complex* X, int N)
     return STATUS_OK;
 }
 
+/**
+    Dealoca toata memoria alocata.
+*/
+void freeMemory(
+    char* inputFile,
+    char* outputFile,
+    double* x,
+    double complex* X,
+    pthread_t* tids,
+    THREAD_ARGS* args)
+{
+    free(inputFile);
+    free(outputFile);
+    free(x);
+    free(X);
+    free(tids);
+    free(args);
+}
+
+/**
+    Fiecare thread calculeaza o anumita sectiune (intre indicii start si end)
+    din vectorul cerut.
+*/
 void* fourierTransform(void* arg)
 {
-    args_t* args = (args_t*)arg;
+    THREAD_ARGS* args   = (THREAD_ARGS*)arg;
 
     int threadID        = args->threadID;
     int N               = args->N;
@@ -172,17 +219,16 @@ void* fourierTransform(void* arg)
     double* x           = args->x;
     double complex* X   = args->X;
 
-    int start   = threadID * ceil((double)N / numThreads);
-    int end     = MIN(N, (threadID + 1) * ceil((double)N / numThreads));
-    double complex tmp;
+    int start           = threadID * ceil((double)N / numThreads);
+    int end             = MIN(N, (threadID + 1) * ceil((double)N / numThreads));
 
     for (int i = start; i != end; ++i)
     {
-        tmp = 0.0 + 0.0 * I;
+        double complex tmp = 0.0 + 0.0 * I;
 
         for (int j = 0; j != N; ++j)
         {
-            tmp += x[j] * cexp(-I * 2.0 * PI * i * j / N);
+            tmp += x[j] * cexp(-I * 2.0 * M_PI * i * j / N);
         }
 
         X[i] = tmp;
@@ -205,12 +251,12 @@ int main(int argc, char** argv)
     double* x           = NULL;
     double complex* X   = NULL;
     pthread_t* tids     = NULL;
-    args_t* args        = NULL;
+    THREAD_ARGS* args   = NULL;
 
     retVal = getInput(inputFile, &x, &N);
     ASSERT(retVal != STATUS_OK, " ", retVal);
 
-    retVal=allocVectors(&X, &tids, &args, N, numThreads);
+    retVal = allocVectors(&X, &tids, &args, N, numThreads);
     ASSERT(retVal != STATUS_OK, " ", retVal);
 
     for (int i = 0; i != numThreads; ++i)
@@ -232,12 +278,7 @@ int main(int argc, char** argv)
     retVal = printOutput(outputFile, X, N);
     ASSERT(retVal != STATUS_OK, " ", retVal);
 
-    free(inputFile);
-    free(outputFile);
-    free(x);
-    free(X);
-    free(tids);
-    free(args);
+    freeMemory(inputFile, outputFile, x, X, tids, args);
     
     return 0;
 }

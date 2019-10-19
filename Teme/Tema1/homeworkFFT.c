@@ -206,6 +206,7 @@ inline void calculateValues(
 
 /**
     FFT recursiv si paralel.
+    Functioneaza pentru un numThreads = 2^k, cu k natural.
 */
 void* recursiveFFT(void* arg)
 {   
@@ -235,8 +236,7 @@ void* recursiveFFT(void* arg)
         nextArgs[1].output = buffer + step;
         nextArgs[1].buffer = output + step;
 
-        if ((step == 1 && numThreads > 1)
-            || (step == 2 && numThreads == 4))
+        if (step << 1 <= numThreads)
         {
             // Se va crea un thread pentru unul dintre apelurile recursive, iar
             // celalalt apel se executa pe threadul curent (secvential)
@@ -246,7 +246,7 @@ void* recursiveFFT(void* arg)
             pthread_join(tid, NULL);
         } else
         {
-            // Ambele apeluri sunt secventiale
+            // Ambele apeluri recursive sunt secventiale
             recursiveFFT(nextArgs);
             recursiveFFT(nextArgs + 1);
         }

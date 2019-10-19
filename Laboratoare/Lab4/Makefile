@@ -11,7 +11,7 @@ PMerge=8
 
 .PHONY: clean all
 
-all: two_sorts mergeSort parShear seqShear
+all: two_sorts mergeSort parShear seqShear bubbleSort
 
 two_sorts: two_sorts.c
 	$(CC) $? -o $@ $(CFLAGS)
@@ -38,10 +38,10 @@ run_bubbleSort: bubbleSort
 	time ./$< $(NBubble) $(P) $(printLevel)
 
 run_seqShear: seqShear
-	time ./$< $(NShear) $(printLevel) > seq
+	time ./$< $(NShear) $(printLevel)
 
 run_parShear: parShear
-	time ./$< $(NShear) $(P) $(printLevel) > par
+	time ./$< $(NShear) $(P) $(printLevel)
 
 clean:
 	rm -f two_sorts mergeSort bubbleSort parShear seqShear

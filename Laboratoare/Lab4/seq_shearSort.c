@@ -47,7 +47,7 @@ void init()
     {
         for (j = 0; j < N; j++)
         {
-            m[i][j] = rand() % N * N;
+            m[i][j] = rand() % (N * N);
         }
     }
 }
@@ -175,7 +175,7 @@ void sort_cols(int** x)
 
 void shearSort(void)
 {
-    int i, lim = log2(N) + 1;
+    int i, lim = log2(N) + 2;
 
     while (lim--)
     {

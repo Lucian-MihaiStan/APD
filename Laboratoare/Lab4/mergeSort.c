@@ -43,7 +43,7 @@ void compareVectors(int * a, int * b) {
 
     for (i = 0; i < N; i++)
     {
-        if (a[i]!=b[i])
+        if (a[i] != b[i])
         {
             printf("Sorted incorrectly\n");
             return;

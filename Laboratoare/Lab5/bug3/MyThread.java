@@ -3,14 +3,10 @@
  * 
  *  Why is value set correct even though we use different locks in
  *  different threads?
- *
- *  Pentru ca a si b sunt referinte catre acelasi sir si Java e cretin si le face practic acelasi
- *  obiect. Daca se schimba unul dintre siruri, apar race conditionuri pentru ca threadurile vor
- *  fi sincronizate dupa obiecte diferite.
  */
 public class MyThread implements Runnable {
-    private static final String a 	= "LOCK";
-    private static final String b 	= "LOCK";
+    private static final String a 	= "LOCKa";
+    private static final String b 	= "LOCKb";
     static int value 				= 0;
 	private final int id;
 

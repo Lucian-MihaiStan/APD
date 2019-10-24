@@ -20,7 +20,7 @@ public class MultVector extends Thread {
         final int end   = min((int)N, (tid + 1) * (int)ceil(N / numThreads));
 
         for (int i = start; i < end; ++i) {
-            v[i] *= 2;
+            v[i] <<= 1;
         }
     }
 }

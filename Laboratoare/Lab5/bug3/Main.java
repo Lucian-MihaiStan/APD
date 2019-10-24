@@ -4,7 +4,7 @@
  * DO NOT MODIFY
  */
 public class Main {
-	static final int N = 100000;
+	static final int N 		= 100000;
 	static int N_ITERATIONS = 100;
 
 	public static void main(String[] args) {

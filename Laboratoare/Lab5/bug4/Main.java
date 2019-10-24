@@ -2,6 +2,8 @@
  * @author cristian.chilipirea
  *
  * Why doesn't this program end? (Hint: volatile)
+ *
+ * volatile nu poate fi cacheuit; este tinut doar in RAM
  */
 public class Main extends Thread {
 	private volatile boolean keepRunning = true;

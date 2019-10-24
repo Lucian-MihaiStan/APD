@@ -1,3 +1,6 @@
+import static java.lang.Math.min;
+import static java.lang.Math.ceil;
+
 public class RoyFloyd extends Thread {
     private int[][] graph;
     private final int tid;
@@ -13,14 +16,14 @@ public class RoyFloyd extends Thread {
 
     @Override
     public void run() {
-        int start   = tid * (int)Math.ceil(N / numThreads);
-        int end     = Math.min((int)N, (tid + 1) * (int)Math.ceil(N / numThreads));
+        final int start   = tid * (int)ceil(N / numThreads);
+        final int end     = min((int)N, (tid + 1) * (int)ceil(N / numThreads));
 
         for (int k = start; k < end; ++k) {
             for (int i = 0; i < N; ++i) {
                 for (int j = 0; j < N; ++j) {
                     synchronized (Main.class) {
-                        graph[i][j] = Math.min(graph[i][k] + graph[k][j], graph[i][j]);
+                        graph[i][j] = min(graph[i][k] + graph[k][j], graph[i][j]);
                     }
                 }
             }

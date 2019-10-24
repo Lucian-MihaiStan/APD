@@ -8,10 +8,11 @@ public class Main {
         	System.out.println("Not enough arguments.");
         	System.exit(1);
 		}
-        int numThreads = Integer.valueOf(args[0]);
-    	int N = 100000013;
-        int[] v = new int[N];
-        MultVector[] threads = new MultVector[numThreads];
+
+        int numThreads          = Integer.valueOf(args[0]);
+    	int N                   = 100000013;
+        int[] v                 = new int[N];
+        MultVector[] threads    = new MultVector[numThreads];
 
         for (int i = 0; i < N; ++i) {
             v[i] = i;
@@ -31,7 +32,7 @@ public class Main {
 		}
 
         for (int i = 0; i < N; ++i) {
-            if(v[i] != i * 2) {
+            if(v[i] != i << 1) {
                 System.out.println("Wrong answer");
                 System.exit(1);
             }

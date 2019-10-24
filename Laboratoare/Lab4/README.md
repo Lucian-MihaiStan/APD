@@ -1,8 +1,8 @@
 # Laborator 4
 Se paralelizeaza diverse tipuri de sortari:
-	- _shear sort_
-	- _merge sort_
-	- _bubble sort_
+- _shear sort_
+- _merge sort_
+- _bubble sort_
 
 Toate rularile si testarile se pot efectua prin intermediuk fisierului
 `Makefile`.

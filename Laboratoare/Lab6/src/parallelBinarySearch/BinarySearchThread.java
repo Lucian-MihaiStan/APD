@@ -11,7 +11,6 @@ public class BinarySearchThread extends Thread {
     private static int position;
     private static int leftLim;
     private static int rightLim;
-    private static boolean finished;
     private int left;
     private int right;
     private final int numThreads;
@@ -29,14 +28,9 @@ public class BinarySearchThread extends Thread {
         rightLim        = N - 1;
         position        = -1;
         this.target     = target;
-        finished        = false;
 
         left    = tid * (int)ceil((double)N / numThreads);
         right   = min(rightLim, (tid + 1) * (int)ceil((double)N / numThreads));
-
-        if (v[leftLim] > target || v[rightLim] < target) {
-            position = -2;
-        }
     }
 
     static int getPosition() {
@@ -45,11 +39,17 @@ public class BinarySearchThread extends Thread {
 
     @Override
     public void run() {
-        while (position == -1 && !finished) {
+        int pos = -1;
+
+        if (v[leftLim] > target || v[rightLim] < target) {
+            position = -2;
+        }
+
+        while (position == -1) {
             if (v[left] == target) {
-                position = left;
+                pos = left;
             } else if (v[right] == target) {
-                position = right;
+                pos = right;
             } else if (v[left] < target && v[right] > target) {
                 leftLim = left;
                 rightLim = right;
@@ -66,8 +66,11 @@ public class BinarySearchThread extends Thread {
             left    = tid * (int)ceil(intervalLen / numThreads) + leftLim;
             right   = min(rightLim, (tid + 1) * (int)ceil(intervalLen / numThreads)) + leftLim;
 
-            if (left == leftLim && right == rightLim) {
-                finished = true;
+            if (pos != -1)
+            {
+                position = pos;
+            } else if (left == leftLim && right == rightLim) {
+                position = -2;
             }
 
             try {

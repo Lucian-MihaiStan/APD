@@ -5,8 +5,6 @@
 Se implementeaza patternul *Producer - Consumer* atat pentru un consumator si
 un producator cat si pentru consumatori si producatori multipli.
 
-Bufferul are de fiecare data o capacitate de 1 elemen.
-
 Se folosesc **semafoare** pentru a se respecta constrangerile problemei:
 - nu se fac citiri si scrieri in buffer in acelasi timp;
 - nu se fac citiri concomitent;
@@ -30,6 +28,13 @@ filosofi vor proceda ca la incput, acum fiind destule resurse disponibile pentru
 toti.
 
 Este mai rapida decat abordarea anterioara, dar filosofii mananca secvential.
+
+### Abordare cu oridine de lock schimbata in functie de paritatea indecsilor
+Filosofii cu index par vor da lock mai intai pe dreapta si apoi pe stanga, iar
+cei cu index impar invers. Astfel, primii mananca in paralel, dupa care mananca
+si ultimii tot in paralel.
+
+Pare cea mai eficienta abordare.
 
 ## Cautare binara
 Cautare binara paralelizata: fiecare thread cauta intr-un subinterval din cel

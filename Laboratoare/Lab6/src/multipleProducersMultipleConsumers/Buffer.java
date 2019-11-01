@@ -6,13 +6,16 @@ import java.util.concurrent.Semaphore;
  *
  */
 class Buffer {
-    private int a;
+    private static int BUFFER_CAPACITY = 5;
+    private int[] v;
     private Semaphore empty;
     private Semaphore full;
+    private int pos;
 
     Buffer() {
-        a 		= -1;
-        empty 	= new Semaphore(1);
+        v       = new int[BUFFER_CAPACITY];
+        pos     = 0;
+        empty   = new Semaphore(BUFFER_CAPACITY);
         full 	= new Semaphore(0);
     }
 
@@ -24,7 +27,8 @@ class Buffer {
         }
 
         synchronized (Main.class) {
-            a = value;
+            pos     = (pos + 1) % BUFFER_CAPACITY;
+            v[pos]  = value;
         }
 
         full.release();
@@ -37,14 +41,19 @@ class Buffer {
             e.printStackTrace();
         }
 
-        int copyA;
+        int val;
 
         synchronized (Main.class) {
-            copyA = a;
+            val = v[pos];
+
+            pos = pos - 1;
+            if (pos < 0) {
+                pos = BUFFER_CAPACITY - 1;
+            }
         }
 
         empty.release();
 
-        return copyA;
+        return val;
     }
 }

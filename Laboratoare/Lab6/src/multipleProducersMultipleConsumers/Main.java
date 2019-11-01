@@ -1,14 +1,15 @@
 package multipleProducersMultipleConsumers;
+
 /**
  * @author cristian.chilipirea
  * 
  * DO NOT MODIFY
  */
 public class Main {
-    static final int N 				= 100000;
-    static final int N_CONSUMERS 	= 5;
-    static final int N_PRODUCERS 	= 3;
-    static int[] results 			= new int[N];
+    static final int N 				        = 100000;
+    private static final int N_CONSUMERS 	= 5;
+    static final int N_PRODUCERS 	        = 3;
+    static int[] results 			        = new int[N];
 
     public static void main(String[] args) {
         Buffer buffer 		= new Buffer();

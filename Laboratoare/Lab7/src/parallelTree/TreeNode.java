@@ -8,25 +8,17 @@ class TreeNode {
 	int name;
 	TreeNode left;
 	TreeNode right;
-	private static Object[] locks;
-	private static final int NUM_PARENTS = 64;
+	private Object lock;
 
 	TreeNode(int name) {
 		this.name 	= name;
 		left 		= null;
 		right		= null;
-
-		if (name == 1) {
-			locks = new Object[NUM_PARENTS];
-
-			for (int i = 1; i < NUM_PARENTS; ++i) {
-				locks[i] = new Object();
-			}
-		}
+		lock 		= new Object();
 	}
 
 	void addChild(TreeNode child) {
-		synchronized (locks[name]) {
+		synchronized (lock) {
 			if (left == null) {
 				left = child;
 			} else {

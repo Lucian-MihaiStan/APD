@@ -8,7 +8,7 @@ class TreeNode {
 	int name;
 	TreeNode left;
 	TreeNode right;
-	private Object lock;
+	private final Object lock;
 
 	TreeNode(int name) {
 		this.name 	= name;

@@ -4,35 +4,58 @@ package parallelTree;
  * @author cristian.chilipirea
  *
  */
-public class TreeNode {
+class TreeNode {
 	int name;
-	public TreeNode left = null;
-	public TreeNode right = null;
+	TreeNode left;
+	TreeNode right;
+	private static Object[] locks;
+	private static final int NUM_PARENTS = 64;
 
 	TreeNode(int name) {
-		this.name = name;
+		this.name 	= name;
+		left 		= null;
+		right		= null;
+
+		if (name == 1) {
+			locks = new Object[NUM_PARENTS];
+
+			for (int i = 1; i < NUM_PARENTS; ++i) {
+				locks[i] = new Object();
+			}
+		}
 	}
 
 	void addChild(TreeNode child) {
-		if (left == null) {
-			left = child;
-			return;
+		synchronized (locks[name]) {
+			if (left == null) {
+				left = child;
+			} else {
+				right = child;
+			}
 		}
-		right = child;
 	}
 
 	TreeNode getNode(int name) {
 		TreeNode aux = null;
-		if (this.name == name)
+
+		if (this.name == name) {
 			return this;
-		if (left != null)
+		}
+
+		if (left != null) {
 			aux = left.getNode(name);
-		if (aux != null)
+		}
+		if (aux != null) {
 			return aux;
-		if (right != null)
+		}
+
+		if (right != null) {
 			aux = right.getNode(name);
-		if (aux != null)
+		}
+		if (aux != null) {
 			return aux;
+		}
+
 		return null;
 	}
 }

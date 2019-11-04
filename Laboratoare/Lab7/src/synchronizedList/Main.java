@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class Main {
-    private static final int NUM_REPS       = 100;
+    private static final int NUM_REPS       = 1000;
     private static final int NUM_THREADS    = 4;
 
     public static void main(String[] args) {

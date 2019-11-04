@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 
 public class Writer extends Thread {
@@ -20,15 +21,11 @@ public class Writer extends Thread {
 
     @Override
     public void run() {
-        File inputFile = new File("elemente" + id + ".txt");
-
         try {
-            FileReader fileReader = new FileReader(inputFile);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String number;
+            Scanner scanner = new Scanner(new File("elemente" + id + ".txt"));
 
-            while ((number = bufferedReader.readLine()) != null) {
-                    buffer.add(Integer.valueOf(number));
+            while (scanner.hasNextInt()) {
+                    buffer.add(scanner.nextInt());
             }
         } catch (IOException e) {
             e.printStackTrace();

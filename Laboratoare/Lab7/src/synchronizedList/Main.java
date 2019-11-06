@@ -10,10 +10,11 @@ public class Main {
     private static final int NUM_THREADS    = 4;
 
     public static void main(String[] args) {
+        Thread[] threads    = new Thread[NUM_THREADS];
+        boolean sorted      = true;
+
         List<Integer> buffer;
-        Thread[] threads = new Thread[NUM_THREADS];
         Semaphore sem;
-        boolean sorted = true;
 
         for (int i = 0; i < NUM_REPS; ++i) {
             sem     = new Semaphore(-2);

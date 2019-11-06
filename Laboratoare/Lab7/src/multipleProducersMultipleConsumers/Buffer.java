@@ -7,11 +7,11 @@ import java.util.concurrent.ArrayBlockingQueue;
  *
  */
 class Buffer {
-    private static int BUFFER_CAPACITY = 5;
+    private static final int BUFFER_CAPACITY = 5;
     private ArrayBlockingQueue<Integer> arr;
 
     Buffer() {
-        arr     = new ArrayBlockingQueue<>(BUFFER_CAPACITY, true);
+        arr = new ArrayBlockingQueue<>(BUFFER_CAPACITY, true);
     }
 
     void put(int value) {

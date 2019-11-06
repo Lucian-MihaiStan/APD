@@ -12,6 +12,7 @@ Temele vor fi incarcate pe *Git* **dupa deadline**
 4. **POSIX**: Sortari paralelizate: *merge sort*, [OETS](https://en.wikipedia.org/wiki/Odd%E2%80%93even_sort), *shear sort*
 5. **Java**: Introducere in API-ul de multithreading al *Java*
 6. **Java**: *Producatori - Consumatori*, *Problema filosofilor* si cautare binara
+7. **Java**: Structuri de date (*thread-safe*) sincronizate
 
 ## Teme
 1. **POSIX**: *DFT* si *FFT*

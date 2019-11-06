@@ -8,17 +8,15 @@ class TreeNode {
 	int name;
 	TreeNode left;
 	TreeNode right;
-	private final Object lock;
 
 	TreeNode(int name) {
 		this.name 	= name;
 		left 		= null;
 		right		= null;
-		lock 		= new Object();
 	}
 
 	void addChild(TreeNode child) {
-		synchronized (lock) {
+		synchronized (this) {
 			if (left == null) {
 				left = child;
 			} else {

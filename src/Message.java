@@ -53,7 +53,6 @@ class Message {
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     /**
      * Gets the current solar system from the message.
      *

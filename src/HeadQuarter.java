@@ -37,24 +37,23 @@ public class HeadQuarter extends Thread {
      */
     private static final String EXIT = "EXIT";
 
-    // map of the galaxy (represented as a graph)
+    // Map of the galaxy (represented as a graph)
     private ArrayList<String> solarSystemNames;
     private ArrayList<String> solarSystemDecodedFrequencies;
     private Integer numberOfSolarSystems;
     private boolean[][] adjacencyMatrix;
 
-    // termination
+    // Termination
     private Integer numberOfSpaceExplorers;
     private AtomicInteger decodedFrequencies;
     private static Set<String> decodedFrequenciesSet = new HashSet<>();
 
-    // communications
+    // Communications
     private CommunicationChannel channel;
 
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     /**
      * Creates a {@code HeadQuarter} object.
      *
@@ -83,7 +82,6 @@ public class HeadQuarter extends Thread {
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     /**
      * Parses the values to be decoded (hashed) by the space explorers.
      *
@@ -107,12 +105,10 @@ public class HeadQuarter extends Thread {
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     /**
      * Parses the decoded frequencies (i.e., hashed values).
      *
-     * @param testCase
-     *            path to the test case being tested
+     * @param testCase path to the test case being tested
      */
     private void parseAnswers(String testCase) {
         solarSystemDecodedFrequencies = new ArrayList<>();
@@ -129,7 +125,6 @@ public class HeadQuarter extends Thread {
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     /**
      * Parses the map of the galaxy (i.e., the graph adjacency matrix).
      *
@@ -187,7 +182,7 @@ public class HeadQuarter extends Thread {
                 System.exit(0);
             }
 
-            // random sleep (simulates periods when the HQ is busy and cannot decode the
+            // Random sleep (simulates periods when the HQ is busy and cannot decode the
             // frequencies for the space explorers)
             try {
                 Thread.sleep((long) (Math.random() * 100));
@@ -220,7 +215,7 @@ public class HeadQuarter extends Thread {
                 }
                 channel.putMessageHeadQuarterChannel(endMessage);
 
-                // add the new decoded frequency to the global set
+                // Add the new decoded frequency to the global set
                 synchronized (Homework.class) {
                     if (!decodedFrequenciesSet.contains(explorerMessage.getData())) {
                         decodedFrequencies.getAndIncrement();

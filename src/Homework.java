@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /*
  * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
  */
-
 /**
  * Main class.
  */
@@ -14,7 +13,6 @@ public class Homework {
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     public static void main(String[] args) {
         if (args.length < 4) {
             System.out.println(

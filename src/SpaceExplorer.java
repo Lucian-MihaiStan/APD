@@ -24,7 +24,7 @@ public class SpaceExplorer extends Thread {
      *            communication channel between the space explorers and the
      *            headquarters
      */
-    public SpaceExplorer(Integer hashCount, Set<Integer> discovered, CommunicationChannel channel) {
+    SpaceExplorer(Integer hashCount, Set<Integer> discovered, CommunicationChannel channel) {
         this.hashCount 	= hashCount;
         this.channel 	= channel;
 
@@ -37,35 +37,36 @@ public class SpaceExplorer extends Thread {
         }
     }
 
+    /**
+     * Thanks to the way the communication channel is implemented, an explorer only has to take a
+     * message, check if the child node is undiscovered, and if so, decode the given frequency and
+     * send it back to HQ.
+     */
     @Override
     public void run() {
         Message message;
-        String decodedFrequency;
+        String crtData;
         Integer childIsExplored;
+        int crtChild;
 
         while (true) {
-            message = channel.getMessageHeadQuarterChannel();
+            message     = channel.getMessageHeadQuarterChannel();
+            crtData     = message.getData();
+            crtChild    = message.getCurrentSolarSystem();
 
-//            System.out.println("From " + message.getParentSolarSystem() + " to " + message.getCurrentSolarSystem());
-
-            if (message.getData().equals("EXIT")) {
-//                System.out.println("exiting");
+            // The galaxy has been fully explored
+            if (crtData.equals("EXIT")) {
                 break;
             }
 
-            childIsExplored = discovered.putIfAbsent(message.getCurrentSolarSystem(), 0);
+            // If the child node is undiscovered, add it to the set (map) of discovered nodes
+            childIsExplored = discovered.putIfAbsent(crtChild, 0);
 
+            // If the child were undiscovered, calculate its frequency and send it to HQ
             if (childIsExplored == null) {
-//                System.out.println("New solar system: " + message.getCurrentSolarSystem());
-                decodedFrequency = encryptMultipleTimes(message.getData(), hashCount);
-                channel.putMessageSpaceExplorerChannel(new Message(
-                        message.getParentSolarSystem(),
-                        message.getCurrentSolarSystem(),
-                        decodedFrequency)
-                );
+                message.setData(encryptMultipleTimes(crtData, hashCount));
+                channel.putMessageSpaceExplorerChannel(message);
             }
-
-//            System.out.println();
         }
     }
 
@@ -81,6 +82,7 @@ public class SpaceExplorer extends Thread {
      */
     private String encryptMultipleTimes(String input, Integer count) {
         String hashed = input;
+
         for (int i = 0; i < count; ++i) {
             hashed = encryptThisString(hashed);
         }
@@ -98,15 +100,19 @@ public class SpaceExplorer extends Thread {
      */
     private static String encryptThisString(String input) {
         try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] messageDigest = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            MessageDigest md        = MessageDigest.getInstance("SHA-256");
+            byte[] messageDigest    = md.digest(input.getBytes(StandardCharsets.UTF_8));
 
-            // convert to string
-            StringBuffer hexString = new StringBuffer();
-            for (int i = 0; i < messageDigest.length; i++) {
-                String hex = Integer.toHexString(0xff & messageDigest[i]);
-                if (hex.length() == 1)
+            // Convert to string
+            StringBuilder hexString = new StringBuilder();
+
+            for (byte crtByte : messageDigest) {
+                String hex = Integer.toHexString(0xff & crtByte);
+
+                if (hex.length() == 1) {
                     hexString.append('0');
+                }
+
                 hexString.append(hex);
             }
             return hexString.toString();

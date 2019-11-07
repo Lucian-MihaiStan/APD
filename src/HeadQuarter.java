@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,12 +16,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class for a Federation HeadQuarter thread.
  */
 public class HeadQuarter extends Thread {
-    // test files
-    private static String NODE_NAMES = "_data.txt";
-    private static String ANSWER = "_answer.txt";
-    private static String GRAPH = "_graph.txt";
+    // Test files
+    private static final String NODE_NAMES = "_data.txt";
+    private static final String ANSWER = "_answer.txt";
+    private static final String GRAPH = "_graph.txt";
 
-    // helper message (used when a solar system has no parent - it is reachable from
+    // Helper message (used when a solar system has no parent - it is reachable from
     // the start)
     private static String NO_PARENT = "NO_PARENT";
 
@@ -30,13 +29,13 @@ public class HeadQuarter extends Thread {
      * Message body that specifies the end of the list of unlocked adjacent solar
      * systems sent by the headquarters to the space explorers.
      */
-    public static String END = "END";
+    private static final String END = "END";
 
     /**
      * Message body that specifies the end of the program (sent to each space
      * explorer).
      */
-    public static String EXIT = "EXIT";
+    private static final String EXIT = "EXIT";
 
     // map of the galaxy (represented as a graph)
     private ArrayList<String> solarSystemNames;
@@ -47,7 +46,7 @@ public class HeadQuarter extends Thread {
     // termination
     private Integer numberOfSpaceExplorers;
     private AtomicInteger decodedFrequencies;
-    private static Set<String> decodedFrequenciesSet = new HashSet<String>();
+    private static Set<String> decodedFrequenciesSet = new HashSet<>();
 
     // communications
     private CommunicationChannel channel;
@@ -70,7 +69,7 @@ public class HeadQuarter extends Thread {
      *            communication channel between the space explorers and the
      *            headquarters
      */
-    public HeadQuarter(String galaxyInfoPath, Integer numberOfSpaceExplorers, AtomicInteger decodedFrequencies,
+    HeadQuarter(String galaxyInfoPath, Integer numberOfSpaceExplorers, AtomicInteger decodedFrequencies,
                        CommunicationChannel channel) {
         parseHashes(galaxyInfoPath);
         parseAnswers(galaxyInfoPath);
@@ -98,8 +97,6 @@ public class HeadQuarter extends Thread {
             for (String line; (line = br.readLine()) != null;) {
                 solarSystemNames.add(line);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -124,8 +121,6 @@ public class HeadQuarter extends Thread {
             for (String line; (line = br.readLine()) != null;) {
                 solarSystemDecodedFrequencies.add(line);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -156,8 +151,6 @@ public class HeadQuarter extends Thread {
                 column.getAndIncrement();
                 row.set(0);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -166,15 +159,14 @@ public class HeadQuarter extends Thread {
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     @Override
     public void run() {
         Message endMessage = new Message(-1, HeadQuarter.END);
 
-        // put the initial solar systems (i.e., accessible from the start)
+        // Put the initial solar systems (i.e., accessible from the start)
         List<Integer> rootNodes = getInitialSolarSystems();
 
-        // send the initial solar systems to the space explorers
+        // Send the initial solar systems to the space explorers
         for (Integer node : rootNodes) {
             channel.putMessageHeadQuarterChannel(new Message(-1, HeadQuarter.NO_PARENT));
             channel.putMessageHeadQuarterChannel(new Message(node, solarSystemNames.get(node)));
@@ -182,11 +174,11 @@ public class HeadQuarter extends Thread {
         channel.putMessageHeadQuarterChannel(endMessage);
 
         while (true) {
-            // if all the solar systems in the galaxy have been found, the program ends
+            // If all the solar systems in the galaxy have been found, the program ends
             // successfully
             if (decodedFrequencies.get() == numberOfSolarSystems) {
                 for (int i = 0; i < numberOfSpaceExplorers; ++i) {
-                    // each space explorer is notified that the discovery mission has completed
+                    // Each space explorer is notified that the discovery mission has completed
                     channel.putMessageHeadQuarterChannel(new Message(-1, HeadQuarter.EXIT));
                 }
                 channel.putMessageHeadQuarterChannel(endMessage);
@@ -203,39 +195,44 @@ public class HeadQuarter extends Thread {
                 e.printStackTrace();
             }
 
-            // wake up and take one message from the space explorers
+            // Wake up and take one message from the space explorers
             Message explorerMessage = channel.getMessageSpaceExplorerChannel();
+
             if (explorerMessage == null) {
                 continue;
             }
 
             if (checkSpaceExplorerMessage(explorerMessage, rootNodes)) {
-                // put all the neighboring (i.e., adjacent undiscovered) solar systems for
+                // Put all the neighboring (i.e., adjacent undiscovered) solar systems for
                 // decoding
-                Integer currentSolarSystem = explorerMessage.getCurrentSolarSystem();
+                int currentSolarSystem = explorerMessage.getCurrentSolarSystem();
                 List<Integer> neighbors = getNeighbors(currentSolarSystem);
 
-                // notify interested space explorers about the new undiscovered solar systems
+                // Notify interested space explorers about the new undiscovered solar systems
                 // (through the communication channel)
                 for (Integer neigh : neighbors) {
-                    channel.putMessageHeadQuarterChannel(
-                            new Message(currentSolarSystem, solarSystemNames.get(currentSolarSystem)));
-                    channel.putMessageHeadQuarterChannel(new Message(neigh, solarSystemNames.get(neigh)));
+                    channel.putMessageHeadQuarterChannel(new Message(
+                            currentSolarSystem,
+                            solarSystemNames.get(currentSolarSystem)));
+                    channel.putMessageHeadQuarterChannel(new Message(
+                            neigh,
+                            solarSystemNames.get(neigh)));
                 }
                 channel.putMessageHeadQuarterChannel(endMessage);
 
                 // add the new decoded frequency to the global set
-                synchronized (decodedFrequenciesSet) {
+                synchronized (Homework.class) {
                     if (!decodedFrequenciesSet.contains(explorerMessage.getData())) {
                         decodedFrequencies.getAndIncrement();
                         decodedFrequenciesSet.add(explorerMessage.getData());
                     }
                 }
             } else {
-                // if the message received from a space explorer is incorrect (i.e., the decoded
+                // If the message received from a space explorer is incorrect (i.e., the decoded
                 // value or the previous solar system was wrong), the galaxy explodes and the
                 // program ends with an error
-                System.out.println("Received incorrect previous solar system or decoding! Galaxy exploded.");
+                System.out.println("Received incorrect previous solar system or decoding!"
+                        + "Galaxy exploded.");
                 System.exit(1);
             }
         }
@@ -244,7 +241,6 @@ public class HeadQuarter extends Thread {
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     /**
      * Computes the initial solar systems (i.e., the ones reachable at the start of
      * the simulation).
@@ -253,7 +249,7 @@ public class HeadQuarter extends Thread {
      */
     private List<Integer> getInitialSolarSystems() {
         List<Integer> rootNodes = new ArrayList<>();
-        boolean visited[] = new boolean[numberOfSolarSystems];
+        boolean[] visited       = new boolean[numberOfSolarSystems];
 
         for (int solarSystem = 0; solarSystem < numberOfSolarSystems; ++solarSystem) {
             if (!visited[solarSystem]) {
@@ -261,13 +257,13 @@ public class HeadQuarter extends Thread {
                 rootNodes.add(solarSystem);
             }
         }
+
         return rootNodes;
     }
 
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     /**
      * Computes the neighbors of a solar system (i.e., other solar systems
      * accessible through the discovered worm-holes).
@@ -280,8 +276,9 @@ public class HeadQuarter extends Thread {
         List<Integer> neighbours = new ArrayList<>();
 
         for (int j = 0; j < numberOfSolarSystems; ++j) {
-            if (adjacencyMatrix[solarSystem][j])
+            if (adjacencyMatrix[solarSystem][j]) {
                 neighbours.add(j);
+            }
         }
 
         return neighbours;
@@ -290,7 +287,6 @@ public class HeadQuarter extends Thread {
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     /**
      * Visits a sub-tree in a graph.
      *
@@ -299,18 +295,20 @@ public class HeadQuarter extends Thread {
      * @param visited
      *            list of visited nodes
      */
-    private void visitSubTree(int solarSystem, boolean visited[]) {
-        LinkedList<Integer> queue = new LinkedList<>();
-        visited[solarSystem] = true;
+    private void visitSubTree(int solarSystem, boolean[] visited) {
+        LinkedList<Integer> queue   = new LinkedList<>();
+        visited[solarSystem]        = true;
         queue.push(solarSystem);
 
         while (!queue.isEmpty()) {
-            int current = queue.poll();
+            int current             = queue.poll();
             List<Integer> neighbors = getNeighbors(current);
+
             for (Integer neigh : neighbors) {
                 if (!visited[neigh]) {
                     visited[neigh] = true;
                     adjacencyMatrix[neigh][current] = false;
+
                     queue.add(neigh);
                 }
             }
@@ -320,7 +318,6 @@ public class HeadQuarter extends Thread {
     /*
      * DO NOT MODIFY THIS FILE! IT WILL BE AUTOMATICALLY OVERWRITTEN BY THE CHECKER!
      */
-
     /**
      * Verifies if a message received from a space explorer is correct (the
      * frequency was decoded correctly and the parent solar system - i.e., the one
@@ -330,21 +327,18 @@ public class HeadQuarter extends Thread {
      *            message to be verifies
      * @param rootSolarSystems
      *            list of root solar systems
-     * @return
+     * @return true if the message is correct
      */
     private boolean checkSpaceExplorerMessage(Message message, List<Integer> rootSolarSystems) {
         int parentNode = message.getParentSolarSystem();
         int currentNode = message.getCurrentSolarSystem();
 
-//        System.out.println("[HQ]: From " + message.getParentSolarSystem() + " to " + message.getCurrentSolarSystem());
-
         if (!rootSolarSystems.contains(currentNode) && !adjacencyMatrix[parentNode][currentNode]) {
-            System.out.println();
             return false;
         }
 
-//        System.out.println("[HQ]: am busit de codificarea fml\n");
-        return message.getData().equals(solarSystemDecodedFrequencies.get(message.getCurrentSolarSystem()));
+        return message.getData().equals(
+                solarSystemDecodedFrequencies.get(message.getCurrentSolarSystem()));
     }
 }
 

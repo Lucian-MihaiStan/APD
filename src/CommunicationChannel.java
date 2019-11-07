@@ -7,18 +7,24 @@ import java.util.concurrent.Semaphore;
 /**
  * Class that implements the channel used by headquarters and space explorers to communicate.
  */
-public class CommunicationChannel {
+class CommunicationChannel {
+    // Buffer for the communication between the explorers and the HQs
     private List<Message> explorerToHQ;
+
+    // Buffer for the communication between the HQs and the explorers
     private List<Message> HQToExplorer;
 
+    // Contains all nodes that are still sending child nodes.
     private ConcurrentHashMap<Long, Integer> parents;
 
+    // Used to signal when the 2 previous buffers are empty.
     private Semaphore fullExplorerToHQ;
     private Semaphore fullHQToExplorer;
+
     /**
      * Creates a {@code CommunicationChannel} object.
      */
-    public CommunicationChannel() {
+    CommunicationChannel() {
         explorerToHQ 		= Collections.synchronizedList(new LinkedList<>());
         HQToExplorer 		= Collections.synchronizedList(new LinkedList<>());
 
@@ -35,7 +41,7 @@ public class CommunicationChannel {
      * @param message
      *            message to be put on the channel
      */
-    public void putMessageSpaceExplorerChannel(Message message) {
+    void putMessageSpaceExplorerChannel(Message message) {
         explorerToHQ.add(message);
         fullExplorerToHQ.release();
     }
@@ -46,11 +52,13 @@ public class CommunicationChannel {
      *
      * @return message from the space explorer channel
      */
-    public Message getMessageSpaceExplorerChannel() {
+    Message getMessageSpaceExplorerChannel() {
         try {
+            // Signal that an element is taken
             fullExplorerToHQ.acquire();
-        } catch(InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException e) {
+            // If an exception is thrown, then return an invalid message
+            return null;
         }
 
         return explorerToHQ.remove(0);
@@ -60,43 +68,48 @@ public class CommunicationChannel {
      * Puts a message on the headquarters channel (i.e., where headquarters write to and
      * space explorers read from).
      *
+     * Distinguishes between nodes coming from different HQs by their threadIDs.
+     * If no prent has been received for a given threadID, then the first message that thread sends
+     * is the parent. Subsequently, all second messages (the parents) are ignored and the the
+     * message added to the buffer contains both the parent and the child nodes, together with the
+     * frequencies.
+     *
      * @param message
      *            message to be put on the channel
      */
-    public void putMessageHeadQuarterChannel(Message message) {
-//        System.out.println("[CHANNEL]: to " + message.getCurrentSolarSystem());
+    void putMessageHeadQuarterChannel(Message message) {
+        String crtData = message.getData();
 
-        if (message.getData().equals("EXIT")) {
+        // "EXIT" is the signal for the explorers to finish, so it is simply forwarded to them
+        if (crtData.equals("EXIT")) {
             HQToExplorer.add(message);
             fullHQToExplorer.release();
             return;
         }
 
+        // The id of the thread using the method
         long tid = Thread.currentThread().getId();
 
-        if (message.getData().equals("END")) {
-//            System.out.println("received END");
+        // The HQ has finished sending parents and children
+        if (crtData.equals("END")) {
+            // Thus, the current parent is no longer relevant
             parents.remove(tid);
             return;
         }
 
+        int crtSolarSystem = message.getCurrentSolarSystem();
+
+        // Use the previously received parent for this thread
         Integer lastParent = parents.get(tid);
-//        System.out.println("lastParent = " + lastParent);
 
         if (lastParent == null) {
-//            System.out.println("putting lastParent in map");
-            parents.put(tid, message.getCurrentSolarSystem());
-        } else if (message.getCurrentSolarSystem() != lastParent){
-//            System.out.println("sending to explorer");
-            HQToExplorer.add(new Message(
-                lastParent,
-                message.getCurrentSolarSystem(),
-                message.getData())
-            );
+            // If there is no such parent node, add it to the map
+            parents.put(tid, crtSolarSystem);
+        } else if (crtSolarSystem != lastParent) {
+            message.setParentSolarSystem(lastParent);
+            HQToExplorer.add(message);
             fullHQToExplorer.release();
         }
-
-//        System.out.println();
     }
 
     /**
@@ -105,11 +118,13 @@ public class CommunicationChannel {
      *
      * @return message from the header quarter channel
      */
-    public Message getMessageHeadQuarterChannel() {
+    Message getMessageHeadQuarterChannel() {
         try {
+            // Signal that an element is taken
             fullHQToExplorer.acquire();
-        } catch(InterruptedException e) {
-            e.printStackTrace();
+        } catch (InterruptedException e) {
+            // If an exception is thrown, then return an invalid message
+            return null;
         }
 
         return HQToExplorer.remove(0);

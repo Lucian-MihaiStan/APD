@@ -64,6 +64,8 @@ public class CommunicationChannel {
      *            message to be put on the channel
      */
     public void putMessageHeadQuarterChannel(Message message) {
+//        System.out.println("[CHANNEL]: to " + message.getCurrentSolarSystem());
+
         if (message.getData().equals("EXIT")) {
             HQToExplorer.add(message);
             fullHQToExplorer.release();
@@ -73,22 +75,28 @@ public class CommunicationChannel {
         long tid = Thread.currentThread().getId();
 
         if (message.getData().equals("END")) {
+//            System.out.println("received END");
             parents.remove(tid);
             return;
         }
 
         Integer lastParent = parents.get(tid);
+//        System.out.println("lastParent = " + lastParent);
 
         if (lastParent == null) {
+//            System.out.println("putting lastParent in map");
             parents.put(tid, message.getCurrentSolarSystem());
-        } else {
+        } else if (message.getCurrentSolarSystem() != lastParent){
+//            System.out.println("sending to explorer");
             HQToExplorer.add(new Message(
-                    lastParent,
-                    message.getCurrentSolarSystem(),
-                    message.getData())
+                lastParent,
+                message.getCurrentSolarSystem(),
+                message.getData())
             );
             fullHQToExplorer.release();
         }
+
+//        System.out.println();
     }
 
     /**

@@ -1,6 +1,5 @@
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
 import java.util.Set;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,13 +46,17 @@ public class SpaceExplorer extends Thread {
         while (true) {
             message = channel.getMessageHeadQuarterChannel();
 
+//            System.out.println("From " + message.getParentSolarSystem() + " to " + message.getCurrentSolarSystem());
+
             if (message.getData().equals("EXIT")) {
+//                System.out.println("exiting");
                 break;
             }
 
             childIsExplored = discovered.putIfAbsent(message.getCurrentSolarSystem(), 0);
 
             if (childIsExplored == null) {
+//                System.out.println("New solar system: " + message.getCurrentSolarSystem());
                 decodedFrequency = encryptMultipleTimes(message.getData(), hashCount);
                 channel.putMessageSpaceExplorerChannel(new Message(
                         message.getParentSolarSystem(),
@@ -61,6 +64,8 @@ public class SpaceExplorer extends Thread {
                         decodedFrequency)
                 );
             }
+
+//            System.out.println();
         }
     }
 

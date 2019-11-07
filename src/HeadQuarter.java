@@ -336,9 +336,14 @@ public class HeadQuarter extends Thread {
         int parentNode = message.getParentSolarSystem();
         int currentNode = message.getCurrentSolarSystem();
 
-        if (!rootSolarSystems.contains(currentNode) && !adjacencyMatrix[parentNode][currentNode])
-            return false;
+//        System.out.println("[HQ]: From " + message.getParentSolarSystem() + " to " + message.getCurrentSolarSystem());
 
+        if (!rootSolarSystems.contains(currentNode) && !adjacencyMatrix[parentNode][currentNode]) {
+            System.out.println();
+            return false;
+        }
+
+//        System.out.println("[HQ]: am busit de codificarea fml\n");
         return message.getData().equals(solarSystemDecodedFrequencies.get(message.getCurrentSolarSystem()));
     }
 }

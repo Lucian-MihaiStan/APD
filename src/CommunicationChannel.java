@@ -1,51 +1,109 @@
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+
 /**
  * Class that implements the channel used by headquarters and space explorers to communicate.
  */
 public class CommunicationChannel {
+    private List<Message> explorerToHQ;
+    private List<Message> HQToExplorer;
 
-	/**
-	 * Creates a {@code CommunicationChannel} object.
-	 */
-	public CommunicationChannel() {
-	}
+    private ConcurrentHashMap<Long, Integer> parents;
 
-	/**
-	 * Puts a message on the space explorer channel (i.e., where space explorers write to and 
-	 * headquarters read from).
-	 * 
-	 * @param message
-	 *            message to be put on the channel
-	 */
-	public void putMessageSpaceExplorerChannel(Message message) {
-	}
+    private Semaphore fullExplorerToHQ;
+    private Semaphore fullHQToExplorer;
+    /**
+     * Creates a {@code CommunicationChannel} object.
+     */
+    public CommunicationChannel() {
+        explorerToHQ 		= Collections.synchronizedList(new LinkedList<>());
+        HQToExplorer 		= Collections.synchronizedList(new LinkedList<>());
 
-	/**
-	 * Gets a message from the space explorer channel (i.e., where space explorers write to and
-	 * headquarters read from).
-	 * 
-	 * @return message from the space explorer channel
-	 */
-	public Message getMessageSpaceExplorerChannel() {
-		return null;
-	}
+        fullExplorerToHQ 	= new Semaphore(0);
+        fullHQToExplorer 	= new Semaphore(0);
 
-	/**
-	 * Puts a message on the headquarters channel (i.e., where headquarters write to and 
-	 * space explorers read from).
-	 * 
-	 * @param message
-	 *            message to be put on the channel
-	 */
-	public void putMessageHeadQuarterChannel(Message message) {
-	}
+        parents             = new ConcurrentHashMap<>();
+    }
 
-	/**
-	 * Gets a message from the headquarters channel (i.e., where headquarters write to and
-	 * space explorer read from).
-	 * 
-	 * @return message from the header quarter channel
-	 */
-	public Message getMessageHeadQuarterChannel() {
-		return null;
-	}
+    /**
+     * Puts a message on the space explorer channel (i.e., where space explorers write to and
+     * headquarters read from).
+     *
+     * @param message
+     *            message to be put on the channel
+     */
+    public void putMessageSpaceExplorerChannel(Message message) {
+        explorerToHQ.add(message);
+        fullExplorerToHQ.release();
+    }
+
+    /**
+     * Gets a message from the space explorer channel (i.e., where space explorers write to and
+     * headquarters read from).
+     *
+     * @return message from the space explorer channel
+     */
+    public Message getMessageSpaceExplorerChannel() {
+        try {
+            fullExplorerToHQ.acquire();
+        } catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return explorerToHQ.remove(0);
+    }
+
+    /**
+     * Puts a message on the headquarters channel (i.e., where headquarters write to and
+     * space explorers read from).
+     *
+     * @param message
+     *            message to be put on the channel
+     */
+    public void putMessageHeadQuarterChannel(Message message) {
+        if (message.getData().equals("EXIT")) {
+            HQToExplorer.add(message);
+            fullHQToExplorer.release();
+            return;
+        }
+
+        long tid = Thread.currentThread().getId();
+
+        if (message.getData().equals("END")) {
+            parents.remove(tid);
+            return;
+        }
+
+        Integer lastParent = parents.get(tid);
+
+        if (lastParent == null) {
+            parents.put(tid, message.getCurrentSolarSystem());
+        } else {
+            HQToExplorer.add(new Message(
+                    lastParent,
+                    message.getCurrentSolarSystem(),
+                    message.getData())
+            );
+            fullHQToExplorer.release();
+        }
+    }
+
+    /**
+     * Gets a message from the headquarters channel (i.e., where headquarters write to and
+     * space explorer read from).
+     *
+     * @return message from the header quarter channel
+     */
+    public Message getMessageHeadQuarterChannel() {
+        try {
+            fullHQToExplorer.acquire();
+        } catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return HQToExplorer.remove(0);
+    }
 }

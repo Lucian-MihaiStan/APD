@@ -16,6 +16,7 @@ Temele vor fi incarcate pe *Git* **dupa deadline**
 
 ## Teme
 1. **POSIX**: *DFT* si *FFT*
+2. **Java**: Explorare de graf prin calculare de hashuri
 
 ## Test
 Colocviul final

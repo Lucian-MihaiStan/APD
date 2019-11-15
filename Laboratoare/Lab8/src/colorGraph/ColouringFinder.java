@@ -4,13 +4,11 @@ import java.util.concurrent.ExecutorService;
 
 public class ColouringFinder extends Thread {
     private ExecutorService tpe;
-    private final int[][] graph;
     private final int[] colours;
     private final int crtStep;
 
-    ColouringFinder(ExecutorService tpe, int[][] graph, int[] colours, int crtStep) {
+    ColouringFinder(ExecutorService tpe, int[] colours, int crtStep) {
         this.tpe        = tpe;
-        this.graph      = graph;
         this.colours    = colours;
         this.crtStep    = crtStep;
     }
@@ -28,7 +26,7 @@ public class ColouringFinder extends Thread {
             newColours[crtStep] = i;
 
             if (verifyColors(newColours)) {
-                tpe.submit(new ColouringFinder(tpe, graph, newColours, crtStep + 1));
+                tpe.submit(new ColouringFinder(tpe, newColours, crtStep + 1));
             }
         }
     }
@@ -43,7 +41,7 @@ public class ColouringFinder extends Thread {
     }
 
     private boolean isEdge(int a, int b) {
-        for (int[] edge : graph) {
+        for (int[] edge : Main.graph) {
             if (edge[0] == a && edge[1] == b) {
                 return true;
             }

@@ -13,10 +13,8 @@ Temele vor fi incarcate pe *Git* **dupa deadline**
 5. **Java**: Introducere in API-ul de multithreading al *Java*
 6. **Java**: *Producatori - Consumatori*, *Problema filosofilor* si cautare binara
 7. **Java**: Structuri de date (*thread-safe*) sincronizate
-8. **Java**: *Executor Service* folosit pentru a rezolva probleme clasice de *backtracking*:
-    - Gasirea unui nod intr-un graf
-    - Colorarea unui graf
-    - Problema reginelor
+8. **Java**: *Executor Service* folosit pentru a rezolva probleme clasice de *backtracking*
+9. **MPI**: Introducere in *MPI*
 
 ## Teme
 1. **POSIX**: *DFT* si *FFT*

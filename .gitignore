@@ -66,6 +66,7 @@ hs_err_pid*
 
 # Other binaries
 *.pdf
+.fuse_hidden*
 
 # Debug files
 *.dSYM/

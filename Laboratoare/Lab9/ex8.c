@@ -8,12 +8,12 @@
 
 int main (int argc, char* argv[])
 {
-    srand(time(NULL));
-
     int i, rank, number, tag;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    rand(time(NULL) + rank);
 
     if (rank == 1)
     {

@@ -12,6 +12,8 @@ int main (int argc, char* argv[])
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    srand(time(NULL) + rank);
+
     if (rank == 3)
     {
         MPI_Status status;
@@ -32,7 +34,7 @@ int main (int argc, char* argv[])
         }
     } else
     {
-        number = rand() % MAX_NUMBER;  // TODO: cum fac ca fiecare proces sa aiba alt random?
+        number = rand() % MAX_NUMBER;
 
         MPI_Send(&number, 1, MPI_INT, 3, MPI_TAG_UB, MPI_COMM_WORLD);
     }

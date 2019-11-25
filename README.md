@@ -15,6 +15,8 @@ Temele vor fi incarcate pe *Git* **dupa deadline**
 7. **Java**: Structuri de date (*thread-safe*) sincronizate
 8. **Java**: *Executor Service* folosit pentru a rezolva probleme clasice de *backtracking*
 9. **MPI**: Introducere in *MPI*
+10. **MPI**: Cateva functii ale *MPI* implementate de mana, pipeline folosit
+pentru sortare si calculare de polinom + rank sort
 
 ## Teme
 1. **POSIX**: *DFT* si *FFT*

@@ -5,10 +5,11 @@ MPIFLAGS=-lm
 NP_Bcast=198
 NP_Reduce_Scan=16
 NP_Poly=14
+NP_Sort=100
 
 .PHONY: build clean
 
-build: Bcast Reduce Scan Poly
+build: Bcast Reduce Scan Poly Sort
 
 Bcast: Bcast.c
 	$(CC) $^ -o $@ $(MPIFLAGS)
@@ -22,6 +23,9 @@ Scan: Scan.c
 Poly: polynomialFunction.c
 	$(CC) $^ -o $@
 
+Sort: sort.c
+	$(CC) $^ -o $@ $(MPIFLAGS)
+
 run_Bcast: Bcast
 	$(MPI) -np $(NP_Bcast) $<
 
@@ -34,5 +38,8 @@ run_Scan: Scan
 run_Poly: Poly
 	$(MPI) -np $(NP_Poly) $<
 
+run_Sort: Sort
+	$(MPI) -np $(NP_Sort) $<
+
 clean:
-	rm -f Bcast Reduce Scan Poly .fuse_hidden*
+	rm -f Bcast Reduce Scan Poly Sort .fuse_hidden*

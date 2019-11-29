@@ -83,14 +83,12 @@ int main (int argc, char* argv[])
                 MPI_COMM_WORLD
             );
         }
-
-        MPI_Barrier(MPI_COMM_WORLD);
     }
 
     if (rank == MASTER)
     {
         printf(
-            "calculated sum = %lu; true sum = %lu\n",
+            "calculated sum = %lu;\ntrue sum = %lu\n",
             sum, 1LU * NUM_ELEMS * (NUM_ELEMS - 1) / 2);
     }
 

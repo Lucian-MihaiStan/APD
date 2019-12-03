@@ -33,8 +33,6 @@ int main (int argc, char* argv[])
             MPI_Send(&sum, 1, MPI_INT, nextProc, MPI_TAG_UB, MPI_COMM_WORLD);
         }
 
-        MPI_Barrier(MPI_COMM_WORLD);
-
         if (prevProc >= 0)
         {
             MPI_Recv(
@@ -49,8 +47,6 @@ int main (int argc, char* argv[])
 
             sum += recvSum;
         }
-
-        MPI_Barrier(MPI_COMM_WORLD);
     }
 
     printf("Finally, process %d has sum %d.\n", rank, sum);

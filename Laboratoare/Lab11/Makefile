@@ -7,7 +7,7 @@ NP_Graph=10
 
 .PHONY: build clean
 
-build: NonBlock GraphUtils SendIsBlocking Topology
+build: NonBlock GraphUtils SendIsBlocking Topology Send0To9
  
 NonBlock: NonBlock.c
 	$(CC) $^ -o $@
@@ -46,4 +46,4 @@ run_RankSort: RankSort
 	$(MPI) -np $(NP_RankSort) $<
 
 clean:
-	rm -f NonBlock GraphUtils SendIsBlocking Topology NP_Graph .fuse_hidden*
+	rm -f NonBlock GraphUtils SendIsBlocking Topology NP_Graph Send0To9 .fuse_hidden*

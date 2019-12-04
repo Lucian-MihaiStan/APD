@@ -99,14 +99,7 @@ void send0To9(int rank)
     int* nextNodes = firstStepBFS(rank);
     int num;
 
-    if (rank == SENDER)
-    {
-        num = rand() % 1000;
-
-        printf("Sender sent: %d\n", num);
-
-        MPI_Send(&num, 1, MPI_INT, nextNodes[9], MPI_TAG_UB, MPI_COMM_WORLD);
-    } else
+    if (rank != SENDER)
     {
         MPI_Recv(
             &num,
@@ -121,11 +114,16 @@ void send0To9(int rank)
         if (rank == RECEIVER)
         {
             printf("Receiver got: %d\n", num);
-        } else
-        {
-            MPI_Send(&num, 1, MPI_INT, nextNodes[9], MPI_TAG_UB, MPI_COMM_WORLD);
         }
+
+    } else
+    {
+        num = rand() % 1000;
+
+        printf("Sender sent: %d\n", num);
     }
+
+    MPI_Send(&num, 1, MPI_INT, nextNodes[9], MPI_TAG_UB, MPI_COMM_WORLD);
 }
 
 int main(int argc, char * argv[])

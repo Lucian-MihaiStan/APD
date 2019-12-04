@@ -47,49 +47,6 @@ int* getNeighbours(int node, int* numNeighbours)
     return neighbours;
 }
 
-int* firstStepBFS(int node)
-{
-    int* visited    = malloc(NUM_NODES * sizeof(*visited));
-    int* queue      = malloc(NUM_NODES * sizeof(*visited));
-    int qStart      = 0;
-    int qEnd        = -1;
-    
-    int i, crtNode, numNeighbours;
-    int* neighbours = NULL;
-
-    memset(visited, 0xff, NUM_NODES * sizeof(*visited));
-
-    visited[node]   = node;
-    neighbours      = getNeighbours(node, &numNeighbours);
-
-    for (i = 0; i != numNeighbours; ++i)
-    {
-        queue[++qEnd] = visited[neighbours[i]] = neighbours[i];
-    }
-
-    while (qEnd >= qStart)
-    {
-        free(neighbours);
-
-        crtNode     = queue[qStart++];
-        neighbours  = getNeighbours(crtNode, &numNeighbours);
-
-        for (i = 0; i != numNeighbours; ++i)
-        {
-            if (visited[neighbours[i]] == -1)
-            {
-                queue[++qEnd]           = neighbours[i];
-                visited[neighbours[i]]  = visited[crtNode];
-            }
-        }
-    }
-
-    free (neighbours);
-    free (queue);
-
-    return visited;
-}
-
 int* distributedSpanningTree(int rank)
 {
     int i, j, numNeighbours;

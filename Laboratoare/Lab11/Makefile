@@ -21,7 +21,7 @@ SendIsBlocking: sendIsBlocking.c
 Topology: Topology.c
 	$(CC) $^ -o $@
 
-Sort: sort.c
+Send0To9: Send0To9.c
 	$(CC) $^ -o $@
 
 RankSort: RankSort.c
@@ -39,11 +39,11 @@ run_SendIsBlocking: SendIsBlocking
 run_Topology: Topology
 	$(MPI) -np $(NP_Graph) $<
 
-run_Sort: Sort
-	$(MPI) -np $(NP_Sort) $<
+run_Send0To9: Send0To9
+	$(MPI) -np $(NP_Graph) $<
 
 run_RankSort: RankSort
 	$(MPI) -np $(NP_RankSort) $<
 
 clean:
-	rm -f NonBlock GraphUtils SendIsBlocking Topology .fuse_hidden*
+	rm -f NonBlock GraphUtils SendIsBlocking Topology NP_Graph .fuse_hidden*

@@ -1,6 +1,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define NUM_NODES       (10)
 
@@ -45,9 +46,54 @@ int* getNeighbours(int node, int* numNeighbours)
     return neighbours;
 }
 
+int* firstStepBFS(int node)
+{
+    int* visited    = malloc(NUM_NODES * sizeof(*visited));
+    int* queue      = malloc(NUM_NODES * sizeof(*visited));
+    int qStart      = 0;
+    int qEnd        = -1;
+    
+    int i, crtNode, numNeighbours;
+    int* neighbours = NULL;
+
+    memset(visited, 0xff, NUM_NODES * sizeof(*visited));
+
+    visited[node]   = node;
+    neighbours      = getNeighbours(node, &numNeighbours);
+
+    for (i = 0; i != numNeighbours; ++i)
+    {
+        queue[++qEnd] = visited[neighbours[i]] = neighbours[i];
+    }
+
+    while (qEnd >= qStart)
+    {
+        free(neighbours);
+
+        crtNode     = queue[qStart++];
+        neighbours  = getNeighbours(crtNode, &numNeighbours);
+
+        for (i = 0; i != numNeighbours; ++i)
+        {
+            if (visited[neighbours[i]] == -1)
+            {
+                queue[++qEnd]           = neighbours[i];
+                visited[neighbours[i]]  = visited[crtNode];
+            }
+        }
+    }
+
+    free (neighbours);
+    free (queue);
+
+    return visited;
+}
+
 int main(int argc, char * argv[])
 {
     int* neighbours = NULL;
+    int* visited    = NULL;
+
     int rank, nProcesses, numNeighbours, i;
     MPI_Status status;
     MPI_Request request;
@@ -65,7 +111,19 @@ int main(int argc, char * argv[])
     }
     printf("\n");
 
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    visited = firstStepBFS(rank);
+
+    printf("From process %d: ", rank);
+    for (i = 0; i < NUM_NODES; ++i)
+    {
+        printf("to process %d: %d; ", i, visited[i]);
+    }
+    printf("\n");
+
     free(neighbours);
+    free(visited);
     MPI_Finalize();
 
     return 0;

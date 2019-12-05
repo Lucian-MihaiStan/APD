@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MAX(x, y)   (((x) > (y)) ? (x) : (y))
+#define MASTER      (0)
+#define NUM_ITER    (100)
 
 /**
  * @author cristian.chilipirea
@@ -46,7 +48,7 @@ int* getNeighbours(int node, int* numNeighbours)
     return neighbours;
 }
 
-int findLeader(int rank, int numProc)
+int findLeader(int rank)
 {
     int numNeighbours, i, j, leader, newLeader;
     int* neighbours;
@@ -54,7 +56,7 @@ int findLeader(int rank, int numProc)
     leader      = rank;
     neighbours  = getNeighbours(rank, &numNeighbours);
 
-    for (i = 0; i != numProc; ++i)
+    for (i = 0; i != NUM_ITER; ++i)
     {
         for (j = 0; j != numNeighbours; ++j)
         {
@@ -86,19 +88,14 @@ int findLeader(int rank, int numProc)
     return leader;
 }
 
-int main(int argc, char* argv[])
+int countNodes(int rank)
 {
-    int i, j, rank, numProc, leader;
+    int i, j;
     float num, newNum;
-    int* neighbours;
     int numNeighbours;
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &numProc);
-
-    neighbours  = getNeighbours(rank, &numNeighbours);
-    leader      = findLeader(rank, numProc);
+    int* neighbours     = getNeighbours(rank, &numNeighbours);
+    int leader          = findLeader(rank);
 
     if (rank == leader)
     {
@@ -108,7 +105,7 @@ int main(int argc, char* argv[])
         num = 0.f;
     }
 
-    for (i = 0; i != numProc; ++i)
+    for (i = 0; i != NUM_ITER; ++i)
     {
         for (j = 0; j != numNeighbours; ++j)
         {
@@ -131,9 +128,20 @@ int main(int argc, char* argv[])
         }
     }
 
-    printf("Process %d says there are %d nodes\n", rank, (int)round(1.f / num));
-
     free(neighbours);
+
+    return (int)round(1.f / num);
+}
+
+int main(int argc, char* argv[])
+{
+    int rank;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    printf("Process %d says there are %d nodes\n", rank, countNodes(rank));
+
     MPI_Finalize();
 
     return 0;

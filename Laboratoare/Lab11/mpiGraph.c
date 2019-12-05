@@ -89,7 +89,7 @@ int* firstStepBFS(int node)
     return visited;
 }
 
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
     int* neighbours = NULL;
     int* visited    = NULL;

@@ -7,7 +7,7 @@
 #define MASTER      (0)
 #define NUM_ELEMS   (10000)
 
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
     srand(time(NULL));
 

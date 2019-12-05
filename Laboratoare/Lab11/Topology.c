@@ -166,7 +166,7 @@ int* distributedSpanningTree(int rank)
     return parents;
 }
 
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
     int rank;
 

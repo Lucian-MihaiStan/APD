@@ -7,7 +7,7 @@ NP_Graph=10
 
 .PHONY: build clean
 
-build: NonBlock GraphUtils SendIsBlocking Topology Send0To9
+build: NonBlock GraphUtils SendIsBlocking Topology Send0To9 FindLeader CountNodes
  
 NonBlock: NonBlock.c
 	$(CC) $^ -o $@
@@ -24,8 +24,11 @@ Topology: Topology.c
 Send0To9: Send0To9.c
 	$(CC) $^ -o $@
 
-RankSort: RankSort.c
+CountNodes: CountNodes.c
 	$(CC) $^ -o $@ $(MPIFLAGS)
+
+FindLeader: FindLeader.c
+	$(CC) $^ -o $@
 
 run_NonBlock: NonBlock
 	$(MPI) -np $(NP_NonBlock) $<
@@ -42,8 +45,11 @@ run_Topology: Topology
 run_Send0To9: Send0To9
 	$(MPI) -np $(NP_Graph) $<
 
-run_RankSort: RankSort
-	$(MPI) -np $(NP_RankSort) $<
+run_FindLeader: FindLeader
+	$(MPI) -np $(NP_Graph) $<
+
+run_CountNodes: CountNodes
+	$(MPI) -np $(NP_Graph) $<
 
 clean:
-	rm -f NonBlock GraphUtils SendIsBlocking Topology NP_Graph Send0To9 .fuse_hidden*
+	rm -f NonBlock GraphUtils SendIsBlocking Topology Send0To9 FindLeader CountNodes .fuse_hidden*

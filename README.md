@@ -18,9 +18,9 @@ Temele vor fi incarcate pe *Git* **dupa deadline**
 10. **MPI**: Cateva functii ale *MPI* implementate de mana, pipeline folosit
 pentru sortare si calculare de polinom + rank sort
 11. **MPI**: `MPI_Isend()`, `MPI_Irecv()` si algoritmi pentru:
-	- stabilirea topologiei
-	- gasirea liderului
-	- numararea statiilor dintr-un cluster
+- stabilirea topologiei
+- gasirea liderului
+- numararea statiilor dintr-un cluster
 
 ## Teme
 1. **POSIX**: *DFT* si *FFT*

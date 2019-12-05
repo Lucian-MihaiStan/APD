@@ -96,8 +96,9 @@ int* firstStepBFS(int node)
 
 void send0To9(int rank)
 {
-    int* nextNodes = firstStepBFS(rank);
-    int num;
+    int i, num, numNeighbours, close = -1, sendFurther = 1;
+    int* nextNodes  = firstStepBFS(rank);
+    int* neighbours = getNeighbours(rank, &numNeighbours);
 
     if (rank != SENDER)
     {
@@ -111,9 +112,15 @@ void send0To9(int rank)
             MPI_STATUS_IGNORE
         );
 
+        if (num == close)
+        {
+            sendFurther = 0;
+        }
+
         if (rank == RECEIVER)
         {
             printf("Receiver got: %d\n", num);
+            sendFurther = 0;
         }
 
     } else
@@ -123,10 +130,31 @@ void send0To9(int rank)
         printf("Sender sent: %d\n", num);
     }
 
-    MPI_Send(&num, 1, MPI_INT, nextNodes[9], MPI_TAG_UB, MPI_COMM_WORLD);
+    if (sendFurther)
+    {
+        MPI_Send(&num, 1, MPI_INT, nextNodes[9], MPI_TAG_UB, MPI_COMM_WORLD);
+    }
+
+    for (i = 0; i != numNeighbours; ++i)
+    {
+        if (neighbours[i] != nextNodes[9])
+        {
+            MPI_Send(
+                &close,
+                1,
+                MPI_INT,
+                neighbours[i],
+                MPI_TAG_UB,
+                MPI_COMM_WORLD
+            );  
+        }
+    }
+
+    free(nextNodes);
+    free(neighbours);
 }
 
-int main(int argc, char * argv[])
+int main(int argc, char* argv[])
 {
     srand(time(NULL));
 

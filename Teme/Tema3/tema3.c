@@ -2,6 +2,9 @@
 #include <mpi.h>
 
 #include "pnm_image_utils.h"
+#include "filters.h"
+
+#define MASTER          (0)
 
 int main(int argc, char** argv)
 {
@@ -11,19 +14,80 @@ int main(int argc, char** argv)
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    retVal = readImage("input_files/PNM/lena.pnm", &image);
+    if (rank == MASTER)
+    {
+        retVal = readImage(argv[1], &image);
+        ASSERT(
+            retVal != PNM_OK,
+            ,
+            " ",
+            retVal;
+        );
 
-    writeImage(&image, "# muie pgp", "plm.pnm");
+        // TODO: calculeaza ce trimiti cui si trimite
+    } else
+    {
+        // TODO: primeste de la toata lumea
+    }
 
-    char* data = calloc(image.height * image.width, sizeof(*data));
-    memcpy(data, image.data, image.height * image.width * sizeof(*data));
-    float filter[] = {1.f / 9.f, 1.f / 9.f, 1.f / 9.f, 1.f / 9.f, 1.f / 9.f, 1.f / 3.f, 1.f / 9.f, 1.f / 9.f, 1.f / 9.f};
+    char* data = malloc(image.height * image.width * sizeof(*data));
+    char* aux;
+    float filter[9];
 
-    applyFilter(&image, data, filter);
+    for (int i = 3; i != argc; ++i)
+    {
+        aux = data;
+        data = image.data;
+        image.data = aux;
 
-    writeImage(&image, "# muie pgp", "plm_smooth.pnm");
+        if (!strcmp(argv[i], "smooth"))
+        {
+            getFilter(filter, SMOOTHING);
+        } else if (!strcmp(argv[i], "blur"))
+        {
+            getFilter(filter, GAUSSIAN_BLUR);
+        } else if (!strcmp(argv[i], "sharpen"))
+        {
+            getFilter(filter, SHARPEN);
+        } else if (!strcmp(argv[i], "mean"))
+        {
+            getFilter(filter, MEAN_REMOVAL);
+        } else if (!strcmp(argv[i], "emboss"))
+        {
+            getFilter(filter, EMBOSS);
+        } else
+        {
+            getFilter(filter, -1);
+        }
+
+        retVal = applyFilter(&image, data, filter);
+        ASSERT(
+            retVal != PNM_OK,
+            free(data); free(image.data),
+            " ",
+            retVal;
+        );
+    }
+
+    if (rank == MASTER)
+    {
+        // TODO: aduna toate
+
+        retVal = writeImage(&image, "# Created by Teodor-Stefan Dutu, using MPI :D", argv[2]);
+        ASSERT(
+            retVal != PNM_OK,
+            free(data); free(image.data),
+            " ",
+            retVal;
+        );
+    } else
+    {
+        // TODO: trimite ce ai
+    }
 
     MPI_Finalize();
+    free(image.data);
+    free(data);
 
     return 0;
 }

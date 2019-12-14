@@ -1,217 +1,231 @@
 #include "pnm_image_utils.h"
 
-PNM_STATUS getImage(const char* imageFile, PNM_IMAGE* image)
+PNM_STATUS readImage(const char* imageFile, PNM_IMAGE* image)
 {
+    /* Se verifica daca parametrii dati functiei sunt valizi */
     ASSERT(
         imageFile == NULL || image == NULL,
         ,
-        "Received null pointer parameters.\n",
+        "[getImage] Received null pointer parameters.\n",
         PNM_BAD_PARAMS
     );
 
-    FILE* imageStream = fopen(imageFile, "rt");
+    /* Se deschide fisierul de input */
+    FILE* inputStream = fopen(imageFile, "rt");
     ASSERT(
-        imageStream == NULL,
+        inputStream == NULL,
         ,
         "Unable to open image file.\n",
         PNM_IMAGE_NOT_FOUND
     );
 
-    fread(image->header.format, sizeof(image->header[0]), 2, imageStream);
+    fgets(image->header.format, FORMAT_LENGTH, inputStream);
     ASSERT(
         image->header.format[1] != '5' && image->header.format[1] != '6',
-        fclose(imageStream),
+        fclose(inputStream),
         "Unknown image format.\n",
         PNM_UNKNOWN_FORMAT;
     );
 
-    fscanf(imageStream, "%hu %hu", &image->header.width, &image->header.height);
-    fscanf(imageStream, "%u", &image->header.maxVal);
+    char title[MAX_TITLE_LENGTH];
+    int stride, numBytes, offsetData, rowWidth;
+    int i, retval;
 
-    int numBytes, retval;
+    /* Se citesc metadatele imaginii */
+    fgets(title, MAX_TITLE_LENGTH, inputStream);
+    fscanf(inputStream, "%d %d\n", &image->header.height, &image->header.width);  // de ce nu vrea hu?
+    fscanf(inputStream, "%hhu\n", &image->header.maxVal);
 
-    if (image->header.format[1] == '5')
+    /* O imagine RGB va avea o latime de 3 ori mai mare */
+    if (image->header.format[1] == '6')
     {
-        numBytes = 1L * image->header.width * image->header.height;
+        stride = 3;
+        image->header.width *= stride;
     } else
     {
-        numBytes = 1L * image->header.width * image->header.height * 3;
+        stride = 1;
     }
 
-    image->data = malloc(numBytes * sizeof(*image->data));
+    rowWidth    = image->header.width + 2 * stride;
+    numBytes    = rowWidth * (image->header.height + 2);
+    offsetData  = rowWidth + stride;
+
+    /* Se aloca memoria in care se va retine imaginea in forma liniarizata */
+    image->data = calloc(numBytes, sizeof(*image->data));
     ASSERT(
         image->data == NULL,
-        fclose(imageStream),
+        fclose(inputStream),
         "Unable to allocate memory for the image.\n",
         PNM_NO_MEMORY;
     );
 
-    retval = fread(image->data, sizeof(*image->data), numBytes, imageStream);
-    ASSERT(
-        retval < numBytes,
-        fclose(imageStream); free(image->data),
-        "Unable to read image file data.\n",
-        PNM_NO_DATA;
-    );
-
-    fclose(imageStream);
-
-    return PNM_OK;
-}
-
-PNM_STATUS padImage(PNM_IMAGE* image)
-{
-    ASSERT(
-        image == NULL,
-        ,
-        "Received null pointer parameter.\n",
-        PNM_BAD_PARAMS
-    );
-
-    char* newData;
-    int stride, numBytes, newNumBytes, lineWidth, offsetNewData, offsetData;
-
-    if (image->header.format[1] == '5')
+    /* Se citesc datele ce constituie pixelii imaginii linie cu linie*/
+    for (i = 0; i != image->header.height; ++i, offsetData += rowWidth)
     {
-        stride = 1;
-    } else
-    {
-        stride = 3;
-    }
-
-    lineWidth       = image->header.width * stride;
-    numBytes        = image->header.width * image->header.height * stride;
-    offsetNewData   = 1;
-    offsetData      = 0;
-    newNumBytes     = (image->header.width + 2) * (image->header.height + 2) * stride;
-
-    newData = calloc(newNumBytes, sizeof(image->data[0]));
-    ASSERT(
-        newData == NULL,
-        ,
-        "Unable to allocate memory for the padded image.\n",
-        PNM_NO_MEMORY
-    );
-
-    for (; offsetData < numBytes;
-           offsetData += lineWidth, offsetNewData += lineWidth + 2 * stride)
-    {
-        memcpy(
-            newData + offsetNewData,
+        retval = fread(
             image->data + offsetData,
-            lineWidth * sizeof(*newData)
+            sizeof(*image->data),
+            image->header.width,
+            inputStream
+        );
+        ASSERT(
+            retval != image->header.width,
+            fclose(inputStream); free(image->data),
+            "Unable to read image file data.\n",
+            PNM_NO_DATA;
         );
     }
 
-    free(image->data);
-    image->data = newData;
+    fclose(inputStream);
+    image->header.width     = rowWidth;
+    image->header.height    += 2;
 
     return PNM_OK;
 }
 
-static int applyConvolution(
-    char* inputData,
-    char* filter,
-    int pos,
-    int offset,
-    int stride
+PNM_STATUS writeImage(
+    PNM_IMAGE* image,
+    const char* title,
+    const char* outputFile
 )
 {
-    int sum = 0;
+    /* Verificare ca parametrii sa nu fie nuli */
+    ASSERT(
+        image == NULL || title == NULL || outputFile == NULL,
+        ,
+        "[writeImage] Received null pointer parameters.\n",
+        PNM_BAD_PARAMS
+    );
 
-    sum += inputImage->data[pos - offset - stride]  * filter[0];
-    sum += inputImage->data[pos - offset]           * filter[1];
-    sum += inputImage->data[pos - offset + stride]  * filter[2];
-    sum += inputImage->data[pos - stride]           * filter[3];
-    sum += inputImage->data[pos]                    * filter[4];
-    sum += inputImage->data[pos + stride]           * filter[5];
-    sum += inputImage->data[pos + offset - stride]  * filter[6];
-    sum += inputImage->data[pos + offset]           * filter[7];
-    sum += inputImage->data[pos + offset + stride]  * filter[8];
+    /* Se deschide fisierul de iesire */
+    FILE* outputStream = fopen(outputFile, "w");
+    ASSERT(
+        outputStream == NULL,
+        ,
+        "Unable to open output file.\n",
+        PNM_FILE_NOT_FOUND
+    );
+
+    int stride, offsetData, rowWidth, maxRow;
+    int i, retval;
+
+    /* O imagine RGB va avea o latime de 3 ori mai mare */
+    if (image->header.format[1] == '6')
+    {
+        stride = 3;
+    } else
+    {
+        stride = 1;
+    }
+
+    rowWidth    = image->header.width - 2 * stride;
+    offsetData  = image->header.width + stride;
+    maxRow      = image->header.height - 2;
+
+    /* Se scrie antetul imaginii */
+    fprintf(
+        outputStream,
+        "%s%s\n%d %d\n%d\n",
+        image->header.format,
+        title,
+        image->header.height - 2,
+        rowWidth / stride,
+        image->header.maxVal
+    );
+
+    /* Se scriu datele ce constituie pixelii imaginii linie cu linie*/
+    for (i = 0; i != maxRow; ++i, offsetData += image->header.width)
+    {
+        retval = fwrite(
+            image->data + offsetData,
+            sizeof(*image->data),
+            rowWidth,
+            outputStream
+        );
+        ASSERT(
+            retval != rowWidth,
+            fclose(outputStream); free(image->data),
+            "Unable to write image data to file.\n",
+            PNM_NO_DATA;
+        );
+    }    
+
+    fclose(outputStream);
+
+    return PNM_OK;    
+}
+
+static inline float applyConvolution(
+    const char* inputData,
+    const float* filter,
+    const int pos,
+    const int width,
+    const int stride,
+    const uint8_t maxVal
+)
+{
+    float sum = 0;
+
+    sum += inputData[pos - width - stride]  * filter[0];
+    sum += inputData[pos - width]           * filter[1];
+    sum += inputData[pos - width + stride]  * filter[2];
+    sum += inputData[pos - stride]          * filter[3];
+    sum += inputData[pos]                   * filter[4];
+    sum += inputData[pos + stride]          * filter[5];
+    sum += inputData[pos + width - stride]  * filter[6];
+    sum += inputData[pos + width]           * filter[7];
+    sum += inputData[pos + width + stride]  * filter[8];
+
+    sum = round(sum);
+    sum = sum > maxVal ? maxVal : sum;
 
     return sum;
 }
 
 PNM_STATUS applyFilter(
     PNM_IMAGE* outputImage,
-    PNM_IMAGE* inputImage,
-    const char* filter
+    const uint8_t* inputData,
+    const float* filter
 )
 {
     ASSERT(
-        inputImage == NULL || outputImage == NULL || filter == NULL,
+        inputData == NULL || outputImage == NULL || filter == NULL,
         ,
         "Received null pointer parameters.\n",
         PNM_BAD_PARAMS
     );
 
-    memcpy(
-        &inputImage->header,
-        &outputImage->header,
-        sizeof(inputImage->header)
-    );
+    int stride, rowWidth, maxRow, rowOffset;
+    int i, j, pos;
 
-    int i, j, pos, lineWidth, stride, numBytes, offset, sum;
-
-    if (inputImage->header.format[1] == '5')
-    {
-        stride = 1;
-    } else
+    /* O imagine RGB va avea o latime de 3 ori mai mare */
+    if (outputImage->header.format[1] == '6')
     {
         stride = 3;
+    } else
+    {
+        stride = 1;
     }
 
-    lineWidth   = (inputImage->header.width + 2) * stride;
-    numBytes    = (inputImage->header.width + 2) * (image->header.height + 2)
-                  * stride;
-    offset      = (inputImage->header.width + 2) * stride;
+    rowWidth    = outputImage->header.width - 2 * stride;
+    maxRow      = outputImage->header.height - 1;
 
-    for (i = (image->header.width + 3) * stride; i < numBytes; i += offset)
+    for (i = 1; i != maxRow; ++i)
     {
-        for (j = 1; j <= lineWidth; ++j)
+        for (j = 1; j <= rowWidth; ++j)
         {
-            pos = i + j;
+            pos = i * outputImage->header.width + j;
 
-            outputImage->data[pos] = applyConvolution(
-                inputImage,
+            outputImage->data[pos] = (uint8_t)applyConvolution(
+                inputData,
                 filter,
                 pos,
-                offset,
-                stride
+                outputImage->header.width,
+                stride,
+                outputImage->header.maxVal
             );
         }
     }
-
-    return PNM_OK;
-}
-
-PNM_STATUS addLine(
-    PNM_IMAGE* image,
-    char* line,
-    LINE_POSITION pos
-)
-{
-    ASSERT(
-        image == NULL || line == NULL || (pos != BEGINNING && pos != END)
-        ,
-        "Received invalid parameters.\n",
-        PNM_BAD_PARAMS
-    );
-
-    int stride, lineWidth, numBytes;
-
-    if (inputImage->header.format[1] == '5')
-    {
-        stride = 1;
-    } else
-    {
-        stride = 3;
-    }
-
-    lineWidth   = (inputImage->header.width + 2) * stride;
-    numBytes    = inputImage->header.width * image->header.height * stride;
-
-
 
     return PNM_OK;
 }

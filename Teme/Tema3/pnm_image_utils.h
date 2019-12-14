@@ -28,12 +28,7 @@ typedef struct
     char title[MAX_TITLE_LENGTH];
     uint8_t maxVal;
     int height, width;
-} PNM_IMAGE_HEADER;
-
-typedef struct
-{
     uint8_t* data;
-    PNM_IMAGE_HEADER header;
 } PNM_IMAGE;
 
 /**

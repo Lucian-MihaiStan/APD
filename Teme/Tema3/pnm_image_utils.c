@@ -19,9 +19,9 @@ PNM_STATUS readImage(const char* imageFile, PNM_IMAGE* image)
         PNM_IMAGE_NOT_FOUND
     );
 
-    fgets(image->header.format, FORMAT_LENGTH, inputStream);
+    fgets(image->format, FORMAT_LENGTH, inputStream);
     ASSERT(
-        image->header.format[1] != '5' && image->header.format[1] != '6',
+        image->format[1] != '5' && image->format[1] != '6',
         fclose(inputStream),
         "Unknown image format.\n",
         PNM_UNKNOWN_FORMAT;
@@ -33,21 +33,21 @@ PNM_STATUS readImage(const char* imageFile, PNM_IMAGE* image)
 
     /* Se citesc metadatele imaginii */
     fgets(title, MAX_TITLE_LENGTH, inputStream);
-    fscanf(inputStream, "%d %d\n", &image->header.height, &image->header.width);  // de ce nu vrea hu?
-    fscanf(inputStream, "%hhu\n", &image->header.maxVal);
+    fscanf(inputStream, "%d %d\n", &image->width, &image->height);  // de ce nu vrea hu?
+    fscanf(inputStream, "%hhu\n", &image->maxVal);
 
     /* O imagine RGB va avea o latime de 3 ori mai mare */
-    if (image->header.format[1] == '6')
+    if (image->format[1] == '6')
     {
         stride = 3;
-        image->header.width *= stride;
+        image->width *= stride;
     } else
     {
         stride = 1;
     }
 
-    rowWidth    = image->header.width + 2 * stride;
-    numBytes    = rowWidth * (image->header.height + 2);
+    rowWidth    = image->width + 2 * stride;
+    numBytes    = rowWidth * (image->height + 2);
     offsetData  = rowWidth + stride;
 
     /* Se aloca memoria in care se va retine imaginea in forma liniarizata */
@@ -60,16 +60,16 @@ PNM_STATUS readImage(const char* imageFile, PNM_IMAGE* image)
     );
 
     /* Se citesc datele ce constituie pixelii imaginii linie cu linie*/
-    for (i = 0; i != image->header.height; ++i, offsetData += rowWidth)
+    for (i = 0; i != image->height; ++i, offsetData += rowWidth)
     {
         retval = fread(
             image->data + offsetData,
             sizeof(*image->data),
-            image->header.width,
+            image->width,
             inputStream
         );
         ASSERT(
-            retval != image->header.width,
+            retval != image->width,
             fclose(inputStream); free(image->data),
             "Unable to read image file data.\n",
             PNM_NO_DATA;
@@ -77,8 +77,8 @@ PNM_STATUS readImage(const char* imageFile, PNM_IMAGE* image)
     }
 
     fclose(inputStream);
-    image->header.width     = rowWidth;
-    image->header.height    += 2;
+    image->width     = rowWidth;
+    image->height    += 2;
 
     return PNM_OK;
 }
@@ -110,7 +110,7 @@ PNM_STATUS writeImage(
     int i, retval;
 
     /* O imagine RGB va avea o latime de 3 ori mai mare */
-    if (image->header.format[1] == '6')
+    if (image->format[1] == '6')
     {
         stride = 3;
     } else
@@ -118,23 +118,23 @@ PNM_STATUS writeImage(
         stride = 1;
     }
 
-    rowWidth    = image->header.width - 2 * stride;
-    offsetData  = image->header.width + stride;
-    maxRow      = image->header.height - 2;
+    rowWidth    = image->width - 2 * stride;
+    offsetData  = image->width + stride;
+    maxRow      = image->height - 2;
 
     /* Se scrie antetul imaginii */
     fprintf(
         outputStream,
         "%s%s\n%d %d\n%d\n",
-        image->header.format,
+        image->format,
         title,
-        image->header.height - 2,
         rowWidth / stride,
-        image->header.maxVal
+        maxRow,
+        image->maxVal
     );
 
     /* Se scriu datele ce constituie pixelii imaginii linie cu linie*/
-    for (i = 0; i != maxRow; ++i, offsetData += image->header.width)
+    for (i = 0; i != maxRow; ++i, offsetData += image->width)
     {
         retval = fwrite(
             image->data + offsetData,
@@ -155,7 +155,7 @@ PNM_STATUS writeImage(
     return PNM_OK;    
 }
 
-static inline float applyConvolution(
+static inline uint8_t applyConvolution(
     const char* inputData,
     const float* filter,
     const int pos,
@@ -166,6 +166,7 @@ static inline float applyConvolution(
 {
     float sum = 0;
 
+    /* Convolutia se aplica desfasurat, element cu element */
     sum += inputData[pos - width - stride]  * filter[0];
     sum += inputData[pos - width]           * filter[1];
     sum += inputData[pos - width + stride]  * filter[2];
@@ -179,7 +180,7 @@ static inline float applyConvolution(
     sum = round(sum);
     sum = sum > maxVal ? maxVal : sum;
 
-    return sum;
+    return (uint8_t)sum;
 }
 
 PNM_STATUS applyFilter(
@@ -199,7 +200,7 @@ PNM_STATUS applyFilter(
     int i, j, pos;
 
     /* O imagine RGB va avea o latime de 3 ori mai mare */
-    if (outputImage->header.format[1] == '6')
+    if (outputImage->format[1] == '6')
     {
         stride = 3;
     } else
@@ -207,22 +208,23 @@ PNM_STATUS applyFilter(
         stride = 1;
     }
 
-    rowWidth    = outputImage->header.width - 2 * stride;
-    maxRow      = outputImage->header.height - 1;
+    /* Se parcurge vectorul ca o matrice si se aplica operatia de convolutie */
+    rowWidth    = outputImage->width - 2 * stride;
+    maxRow      = outputImage->height - 1;
 
     for (i = 1; i != maxRow; ++i)
     {
         for (j = 1; j <= rowWidth; ++j)
         {
-            pos = i * outputImage->header.width + j;
+            pos = i * outputImage->width + j;
 
-            outputImage->data[pos] = (uint8_t)applyConvolution(
+            outputImage->data[pos] = applyConvolution(
                 inputData,
                 filter,
                 pos,
-                outputImage->header.width,
+                outputImage->width,
                 stride,
-                outputImage->header.maxVal
+                outputImage->maxVal
             );
         }
     }

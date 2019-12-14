@@ -5,22 +5,21 @@
 
 int main(int argc, char** argv)
 {
-    PNM_IMAGE image, img;
+    PNM_IMAGE image;
     int rank, retVal;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    retVal = readImage("safe/Putu.pnm", &image);
-    readImage("safe/Putu.pnm", &img);
+    retVal = readImage("input_files/PNM/lena.pnm", &image);
 
     writeImage(&image, "# muie pgp", "plm.pnm");
 
-    // char* data = calloc(image.header.height * image.header.width, sizeof(*data));
-    // memcpy(data, image.data, image.header.height * image.header.width * sizeof(*data));
-    float filter[] = {0.f / 9.f, 1.f / 3.f, 0.f / 9.f, 0.f / 3.f, 1.f / 3.f, 0.f / 3.f, 0.f / 9.f, 1.f / 3.f, 0.f / 9.f};
+    char* data = calloc(image.height * image.width, sizeof(*data));
+    memcpy(data, image.data, image.height * image.width * sizeof(*data));
+    float filter[] = {1.f / 9.f, 1.f / 9.f, 1.f / 9.f, 1.f / 9.f, 1.f / 9.f, 1.f / 3.f, 1.f / 9.f, 1.f / 9.f, 1.f / 9.f};
 
-    applyFilter(&image, img.data, filter);
+    applyFilter(&image, data, filter);
 
     writeImage(&image, "# muie pgp", "plm_smooth.pnm");
 

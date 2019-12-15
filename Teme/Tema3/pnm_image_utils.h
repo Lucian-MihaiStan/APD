@@ -1,7 +1,6 @@
 #ifndef PNM_IMAGE_UTILS_H
 #define PNM_IMAGE_UTILS_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -20,6 +19,9 @@
 #define FORMAT_LENGTH               (4)
 #define MAX_TITLE_LENGTH            (100)
 
+#define TRUE                        (1)
+#define FALSE                       (0)
+
 typedef int PNM_STATUS;
 
 typedef struct
@@ -32,10 +34,16 @@ typedef struct
 } PNM_IMAGE;
 
 /**
-*   Citeste o imagine iar datele sunt puse intr-o structura de tip PNM_IMAGE
+*   Citeste o imagine iar datele sunt puse intr-o structura de tip PNM_IMAGE.
 *   Imaginea este salvata gata bordata.
+*   Parametrul `wholeImage` decide daca se citeste toata imaginea sau doar
+*   antetul.
 */
-PNM_STATUS readImage(const char* imageFile, PNM_IMAGE* image);
+PNM_STATUS readImage(
+    const char* imageFile,
+    PNM_IMAGE* image,
+    uint8_t wholeImage
+);
 
 /**
 *   Scrie imaginea bordata data ca parametru intr-un fisier.

@@ -1,6 +1,10 @@
 #include "pnm_image_utils.h"
 
-PNM_STATUS readImage(const char* imageFile, PNM_IMAGE* image)
+PNM_STATUS readImage(
+    const char* imageFile,
+    PNM_IMAGE* image,
+    uint8_t wholeImage
+)
 {
     /* Se verifica daca parametrii dati functiei sunt valizi */
     ASSERT(
@@ -33,7 +37,7 @@ PNM_STATUS readImage(const char* imageFile, PNM_IMAGE* image)
 
     /* Se citesc metadatele imaginii */
     fgets(title, MAX_TITLE_LENGTH, inputStream);
-    fscanf(inputStream, "%d %d\n", &image->width, &image->height);  // de ce nu vrea hu?
+    fscanf(inputStream, "%d %d\n", &image->width, &image->height);
     fscanf(inputStream, "%hhu\n", &image->maxVal);
 
     /* O imagine RGB va avea o latime de 3 ori mai mare */
@@ -46,38 +50,44 @@ PNM_STATUS readImage(const char* imageFile, PNM_IMAGE* image)
         stride = 1;
     }
 
-    rowWidth    = image->width + 2 * stride;
-    numBytes    = rowWidth * (image->height + 2);
-    offsetData  = rowWidth + stride;
-
-    /* Se aloca memoria in care se va retine imaginea in forma liniarizata */
-    image->data = calloc(numBytes, sizeof(*image->data));
-    ASSERT(
-        image->data == NULL,
-        fclose(inputStream),
-        "Unable to allocate memory for the image.\n",
-        PNM_NO_MEMORY;
-    );
-
-    /* Se citesc datele ce constituie pixelii imaginii linie cu linie*/
-    for (i = 0; i != image->height; ++i, offsetData += rowWidth)
+    if (wholeImage)
     {
-        retval = fread(
-            image->data + offsetData,
-            sizeof(*image->data),
-            image->width,
-            inputStream
-        );
+        rowWidth    = image->width + 2 * stride;
+        numBytes    = rowWidth * (image->height + 2);
+        offsetData  = rowWidth + stride;
+
+        /* Se aloca memoria in care se va retine imaginea in forma liniarizata */
+        image->data = calloc(numBytes, sizeof(*image->data));
         ASSERT(
-            retval != image->width,
-            fclose(inputStream); free(image->data),
-            "Unable to read image file data.\n",
-            PNM_NO_DATA;
+            image->data == NULL,
+            fclose(inputStream),
+            "Unable to allocate memory for the image.\n",
+            PNM_NO_MEMORY;
         );
+
+        /* Se citesc datele ce constituie pixelii imaginii linie cu linie*/
+        for (i = 0; i != image->height; ++i, offsetData += rowWidth)
+        {
+            retval = fread(
+                image->data + offsetData,
+                sizeof(*image->data),
+                image->width,
+                inputStream
+            );
+            ASSERT(
+                retval != image->width,
+                fclose(inputStream); free(image->data),
+                "Unable to read image file data.\n",
+                PNM_NO_DATA;
+            );
+        }
+    } else
+    {
+        image->data = NULL;
     }
 
     fclose(inputStream);
-    image->width     = rowWidth;
+    image->width     += 2 * stride;
     image->height    += 2;
 
     return PNM_OK;

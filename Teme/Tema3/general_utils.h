@@ -1,6 +1,8 @@
 #ifndef GENRAL_UTILS_H
 #define GENRAL_UTILS_H
 
+#include <stdio.h>
+
 /**
     Verifica o conditie si daca aceasta este indeplinita, se efectueaza actiunea
     data, se afiseaza mesajul dat si returneaza valoarea specificata specificata.

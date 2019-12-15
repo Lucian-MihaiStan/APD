@@ -2,7 +2,7 @@ CC=mpicc
 MPI=mpirun
 MPIFLAGS=-lm
 
-NP=1
+NP=12
 FilterTypes=sharpen smooth emboss
 InputFile=input_files/PNM/baby-yoda.pnm
 OutputFile=filtered-baby-yoda.pnm

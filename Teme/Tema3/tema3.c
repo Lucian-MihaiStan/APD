@@ -9,7 +9,7 @@
 
 #define MASTER          (0)
 
-int sendDataFromMaster(PNM_IMAGE* image, int rank, int numProc)
+int getDataFromMaster(PNM_IMAGE* image, int rank, int numProc)
 {
     int initialHeight, numBytes, i;
 
@@ -32,9 +32,6 @@ int sendDataFromMaster(PNM_IMAGE* image, int rank, int numProc)
     image->height   = end - start;
     numBytes        = image->height * image->width;
 
-    printf("Process %d has start = %d; end = %d; h = %d; bytes = %d\n", rank, start, end, image->height, numBytes);
-
-    // TODO: primeste tot
     if (rank != MASTER)
     {
         image->data = malloc(numBytes * sizeof(*image->data));
@@ -49,10 +46,8 @@ int sendDataFromMaster(PNM_IMAGE* image, int rank, int numProc)
             MPI_STATUS_IGNORE
         );
 
-        printf("procesu' %d a primit\n", rank);
-    } else
+    } else if (numProc > 1)
     {
-        // TODO: Send
         --numProc;
 
         /* Se trimit datele tuturor proceselor mai putin ultimului */
@@ -72,7 +67,6 @@ int sendDataFromMaster(PNM_IMAGE* image, int rank, int numProc)
         * Ultimul proces va avea in general mai putine date, care i se trimit
         * separat
         */
-        printf("ultimului ii dau %d\n", initialHeight * image->width - i * numBytes);
         MPI_Send(
             image->data + i * numBytes,
             initialHeight * image->width - i * numBytes,
@@ -100,7 +94,7 @@ PNM_STATUS processImage(
     float filter[9]; 
 
     initialHeight   = image->height;
-    numBytes        = sendDataFromMaster(image, rank, numProc);
+    numBytes        = getDataFromMaster(image, rank, numProc);
     data            = malloc(numBytes * sizeof(*data));
 
     for (int i = 3; i != argc; ++i)
@@ -117,6 +111,8 @@ PNM_STATUS processImage(
     }
 
     free(data);
+
+    // TODO: aduna datele
 
     return PNM_OK;
 }

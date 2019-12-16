@@ -83,6 +83,8 @@ static PNM_STATUS scatterData(
             MPI_COMM_WORLD,
             MPI_STATUS_IGNORE
         );
+
+        printf("%d primeste %d\n", rank, numBytesScatter);
     } else if (numProc > 1)
     {
         --numProc;
@@ -91,7 +93,7 @@ static PNM_STATUS scatterData(
         for (i = 1; i != numProc; ++i)
         {
             MPI_Send(
-                image->data + i * chunkSize - image->width,
+                image->data + i * chunkSize,
                 numBytesScatter,
                 MPI_CHAR,
                 i,
@@ -105,8 +107,8 @@ static PNM_STATUS scatterData(
         * separat
         */
         MPI_Send(
-            image->data + numProc * chunkSize - image->width,
-            image->height * image->width - numProc * chunkSize + image->width,
+            image->data + numProc * chunkSize,
+            image->height * image->width - numProc * chunkSize,
             MPI_CHAR,
             numProc,
             MPI_TAG_UB,
@@ -132,6 +134,8 @@ static void gatherData(
 
     if (rank != MASTER)
     {
+        printf("%d trimite inapoi %d; + w = %d\n", rank, numBytesGather, numBytesGather + image->width);
+
         /* Procesele trimit datele lor prelucrate catre MASTER */
         MPI_Send(
             image->data + image->width,
@@ -141,6 +145,8 @@ static void gatherData(
             MPI_TAG_UB,
             MPI_COMM_WORLD
         );
+
+        printf("wtf %d\n", rank);
     } else if (numProc > 1)
     {
         --numProc;
@@ -148,8 +154,9 @@ static void gatherData(
         /* Se primesc datele tuturor proceselor mai putin de la ultimul */
         for (i = 1; i != numProc; ++i)
         {
+            printf("%d primeste inapoi de la %d: %d la pozitia %d\n", rank, i, numBytesGather, i * numBytesGather + image->width);
             MPI_Recv(
-                image->data + i * numBytesGather,
+                image->data + i * numBytesGather + image->width,
                 numBytesGather,
                 MPI_CHAR,
                 i,
@@ -163,9 +170,11 @@ static void gatherData(
         * Ultimul proces va avea in general mai putine date, pe care MASTER le
         * primeste separat
         */
+        printf("%d primeste inapoi de la %d: %d la pozitia %d din %d \n",
+            rank, numProc, image->height * image->width - numProc * numBytesGather - image->width, numProc * numBytesGather + image->width, image->height * image->width);
         MPI_Recv(
-            image->data + numProc * chunkSize,
-            image->height * image->width - numProc * chunkSize,
+            image->data + numProc * numBytesGather + image->width,
+            image->height * image->width - numProc * numBytesGather - image->width,
             MPI_CHAR,
             numProc,
             MPI_TAG_UB,
@@ -196,11 +205,11 @@ int processImage(
     * Fiecare proces calculeaza portiunea de imagine pe care va aplica
     * filtrele
     */
-    int linesChunk      = ceil((double)image->height / numProc);
+    int linesChunk      = ceil((double)(image->height - 2) / numProc);
     int chunkSize       = linesChunk * image->width;
     int initialHeight   = image->height;
-    int start           = rank * linesChunk;
-    int end             = MIN(image->height, (rank + 1) * linesChunk);
+    int start           = rank * linesChunk - 1;
+    int end             = MIN(image->height, (rank + 1) * linesChunk) + 1;
 
     /* Se calculeaza parametrii necesari procesarii */
     if (rank != numProc - 1)
@@ -210,23 +219,17 @@ int processImage(
     } else
     {
         numBytesScatter = initialHeight * image->width
-                          - (numProc - 1) * chunkSize
-                          + image->width;
+                          - (numProc - 1) * chunkSize;
         numBytesGather  = numBytesScatter - image->width;
     }
 
-    if (rank != MASTER)
-    {
-        --start;
-    }
-    if (rank != numProc - 1)
-    {
-        ++end;
-    }
+    printf("%d = [%d, %d)\n", rank, start, end);
 
     if (rank == MASTER)
     {
         usedBytes = initialHeight * image->width;
+        printf("chunkSize = %d; linesChunk = %d; image->height = %d\n", chunkSize, linesChunk, image->height);
+        printf("numBytesGather = %d; numBytesGather = %d\n", numBytesScatter, numBytesGather);
     } else
     {
         usedBytes = image->height * image->width;
@@ -237,6 +240,8 @@ int processImage(
     ASSERT(retVal != PNM_OK, , " ", retVal);
 
     image->height = end - start;
+
+    printf("%d are inaltime de %d\n", rank, image->height);
 
     /* Se face procesarea efectiva */ 
     retVal = applyFilters(image, usedBytes, argc, argv);

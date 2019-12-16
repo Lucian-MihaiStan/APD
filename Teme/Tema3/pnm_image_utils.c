@@ -220,12 +220,12 @@ PNM_STATUS applyFilter(
     }
 
     /* Se parcurge vectorul ca o matrice si se aplica operatia de convolutie */
-    rowWidth    = outputImage->width - 2 * stride;
+    rowWidth    = outputImage->width - stride;
     maxRow      = outputImage->height - 1;
 
     for (i = 1; i != maxRow; ++i)
     {
-        for (j = 1; j <= rowWidth; ++j)
+        for (j = stride; j != rowWidth; ++j)
         {
             pos = i * outputImage->width + j;
 

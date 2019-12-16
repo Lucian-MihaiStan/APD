@@ -53,13 +53,16 @@ algoritmul va functiona mai repede decat in cazul unei implementari clasice,
 deoarece toate cele 9 elemente pe care se va aplica operatia de convolutie vor
 putea fi stocate in cacheul procesorului.
 
-Acest comportament se poate observa in exemplul dat mai jos.
+Acest comportament se poate observa in exemplul de rulare dat mai jos.
 
 ## Scalare
 S-a incercat minimizarea numarului de mesaje interschimbate de procese si
 deblocarea cat mai rapida in momentul in care trebuie ca acestea sa-si trimita
 liniile de inceput si final. Astfel, ruland scriptul `test_scaling.sh` pe un
 **Intel i7-8700K @ 4.2Ghz** se pot observa urmatoarele:
+
+Pentru evaluarea algoritmului se va folosi cea mai mare poza disponibila:
+landscape.pnm (3840x2160).
 
 ```
 teo@obor Tema3 $ ./test_scaling.sh input_files/PNM/landscape.pnm landscape_smooth.pnm

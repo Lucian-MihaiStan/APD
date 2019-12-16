@@ -6,8 +6,6 @@
 #include "pnm_image_utils.h"
 #include "filters.h"
 
-#define MASTER 			(0)
-
 /**
 *	Imparte imaginea de la procesul MASTER la toate celelalte si aplica filtrele
 *	date pe aceasta.

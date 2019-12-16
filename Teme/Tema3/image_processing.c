@@ -23,7 +23,7 @@ static PNM_STATUS applyFilters(
 
     int retVal, i;
     uint8_t* aux;
-    double filter[9]; 
+    double filter[9];
 
     int lastLinePos = image->width * (image->height - 2);
     uint8_t* data   = malloc(usedBytes * sizeof(*data));
@@ -35,7 +35,7 @@ static PNM_STATUS applyFilters(
     );
 
     for (i = 3; i != argc; ++i)
-    {
+    {   
         /* Procesele isi trimit prima si ultima linie */
         if (rank != numProc - 1)
         {
@@ -102,74 +102,6 @@ static PNM_STATUS applyFilters(
 }
 
 /**
-*   Trimite datele de la MASTER catre toate celelalte procese.
-*/
-static PNM_STATUS scatterData(
-    PNM_IMAGE* image,
-    int rank,
-    int numProc,
-    int chunkSize,
-    int numBytesScatter
-)
-{
-    int i;
-
-    if (rank != MASTER)
-    {
-        /* Procesele aloca memorie pentru datele pe care mai apoi le primesc */
-        image->data = malloc((chunkSize + 2 * image->width) * sizeof(*image->data));
-        ASSERT(
-            image->data == NULL,
-            ,
-            "Unable to allocate memory for image data.\n",
-            PNM_NO_MEMORY
-        );
-
-        MPI_Recv(
-            image->data + image->width,
-            numBytesScatter,
-            MPI_CHAR,
-            MASTER,
-            MPI_ANY_TAG,
-            MPI_COMM_WORLD,
-            MPI_STATUS_IGNORE
-        );
-
-    } else if (numProc > 1)
-    {
-        --numProc;
-
-        /* Se trimit datele tuturor proceselor mai putin ultimului */
-        for (i = 1; i != numProc; ++i)
-        {
-            MPI_Send(
-                image->data + i * chunkSize + image->width,
-                chunkSize,
-                MPI_CHAR,
-                i,
-                MPI_TAG_UB,
-                MPI_COMM_WORLD
-            );
-        }
-
-        /**
-        * Ultimul proces va avea in general mai putine date, care i se trimit
-        * separat
-        */
-        MPI_Send(
-            image->data + numProc * chunkSize + image->width,
-            image->height * image->width - numProc * chunkSize - image->width,
-            MPI_CHAR,
-            numProc,
-            MPI_TAG_UB,
-            MPI_COMM_WORLD
-        );
-    }
-
-    return PNM_OK;
-}
-
-/**
 *   MASTER primeste datele de la toate celelalte procese.
 */
 static void gatherData(
@@ -228,7 +160,7 @@ static void gatherData(
     }
 }
 
-int processImage(
+PNM_STATUS processImage(
     PNM_IMAGE* image,
     int rank,
     int numProc,
@@ -243,7 +175,7 @@ int processImage(
         PNM_BAD_PARAMS
     );
 
-    int numBytesTransfer, usedBytes, retVal;
+    int numBytesGather, usedBytes, retVal;
 
     /**
     * Fiecare proces calculeaza portiunea de imagine pe care va aplica
@@ -252,20 +184,23 @@ int processImage(
     int linesChunk      = ceil((double)(image->height - 2) / numProc);
     int chunkSize       = linesChunk * image->width;
     int initialHeight   = image->height;
-    int start           = rank * linesChunk - 1;
-    int end             = MIN(image->height, (rank + 1) * linesChunk) + 1;
+    int start           = rank * linesChunk;
+    int end             = MIN(image->height, (rank + 1) * linesChunk + 2);
 
     /* Se calculeaza parametrii necesari procesarii */
     if (rank != numProc - 1)
     {
-        numBytesTransfer = chunkSize;
+        numBytesGather = chunkSize;
     } else
     {
-        numBytesTransfer = initialHeight * image->width
-                          - (numProc - 1) * chunkSize
-                          - image->width;
+        numBytesGather = initialHeight * image->width
+                         - (numProc - 1) * chunkSize
+                         - image->width;
     }
 
+    image->height = end - start;
+
+    /* Se calculeaza numarul de octeti care vor fi folositi de fiecare proces */
     if (rank == MASTER)
     {
         usedBytes = initialHeight * image->width;
@@ -274,21 +209,14 @@ int processImage(
         usedBytes = image->height * image->width;
     }
 
-    /* Se trimit datele catre toate procesele */ 
-    retVal = scatterData(image, rank, numProc, chunkSize, numBytesTransfer);
-    ASSERT(retVal != PNM_OK, , " ", retVal);
-
-    image->height = end - start;
-
-    /* Se face procesarea efectiva */ 
+    /* Se face procesarea efectiva */
     retVal = applyFilters(image, rank, numProc, usedBytes, argc, argv);
     ASSERT(retVal != PNM_OK, , " ", retVal);
 
     image->height = initialHeight;
 
-
     /* Se primesc datele procesate de la toate procesele */ 
-    gatherData(image, rank, numProc, chunkSize, numBytesTransfer);
+    gatherData(image, rank, numProc, chunkSize, numBytesGather);
 
     return PNM_OK;
 }

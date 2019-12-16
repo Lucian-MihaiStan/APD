@@ -10,17 +10,9 @@ int main(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &numProc);
 
-    if (rank == MASTER)
-    {
-        /* Procesul MASTER citeste intreaga imagine */
-        retVal = readImage(argv[1], &image, TRUE);
-        ASSERT(retVal != PNM_OK, MPI_Finalize(), " ", retVal);
-    } else
-    {
-        /* Celelalte procese citesc doar headerul */
-        retVal = readImage(argv[1], &image, FALSE);
-        ASSERT(retVal != PNM_OK, MPI_Finalize(), " ", retVal);
-    }
+    /* Procesele citesc fiecare cate o bucata din imagine */
+    retVal = readImage(&image, argv[1], rank, numProc);
+    ASSERT(retVal != PNM_OK, MPI_Finalize(), " ", retVal);
 
     /* Se trimit, proceseaza si recompun datele */
     retVal = processImage(&image, rank, numProc, argc, argv);

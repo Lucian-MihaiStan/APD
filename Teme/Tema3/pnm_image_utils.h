@@ -24,6 +24,10 @@
 
 typedef int PNM_STATUS;
 
+
+/**
+*   Structura in care se va retine imaginea.
+*/
 typedef struct
 {
     char format[FORMAT_LENGTH];
@@ -36,13 +40,13 @@ typedef struct
 /**
 *   Citeste o imagine iar datele sunt puse intr-o structura de tip PNM_IMAGE.
 *   Imaginea este salvata gata bordata.
-*   Parametrul `wholeImage` decide daca se citeste toata imaginea sau doar
-*   antetul.
+*   Fiecare proces va citi doar o portiune din imagine.
 */
 PNM_STATUS readImage(
-    const char* imageFile,
     PNM_IMAGE* image,
-    const uint8_t wholeImage
+    const char* imageFile,
+    const int rank,
+    const int numProc
 );
 
 /**

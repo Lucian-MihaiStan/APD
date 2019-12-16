@@ -4,9 +4,9 @@ MPI=mpirun
 MPIFLAGS=-lm
 
 NP=12  # sarakilor
-FilterTypes=blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur blur 
-InputFile=input_files/PNM/macro.pnm
-OutputFile=macro_emboss.pnm
+FilterTypes=smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth
+InputFile=input_files/PNM/baby-yoda.pnm
+OutputFile=baby-yoda_smooth.pnm
 
 .PHONY: build clean
 
@@ -28,7 +28,7 @@ image_processing.o: image_processing.c
 	$(CC) $(CFLAGS) $^ -c
 
 run_tema3: tema3
-	time $(MPI) -np $(NP) $< $(InputFile) $(OutputFile) $(FilterTypes)
+	@time $(MPI) -np $(NP) $< $(InputFile) $(OutputFile) $(FilterTypes)
 
 clean:
 	rm -f tema3 *.o .fuse_hidden* *.pgm *.pnm

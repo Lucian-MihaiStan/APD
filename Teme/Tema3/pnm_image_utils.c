@@ -1,9 +1,10 @@
 #include "pnm_image_utils.h"
 
 PNM_STATUS readImage(
-    const char* imageFile,
     PNM_IMAGE* image,
-    const uint8_t wholeImage
+    const char* imageFile,
+    const int rank,
+    const int numProc
 )
 {
     /* Se verifica daca parametrii dati functiei sunt valizi */
@@ -50,45 +51,53 @@ PNM_STATUS readImage(
         stride = 1;
     }
 
-    if (wholeImage)
+    int linesChunk  = ceil((double)image->height / numProc);
+    int start       = rank * linesChunk;
+    int end         = MIN(image->height, (rank + 1) * linesChunk);
+    int usedHeight  = end - start;
+
+    rowWidth        = image->width + 2 * stride;
+    offsetData      = rowWidth + stride;
+
+    if (rank == MASTER)
     {
-        rowWidth    = image->width + 2 * stride;
-        numBytes    = rowWidth * (image->height + 2);
-        offsetData  = rowWidth + stride;
-
-        /* Se aloca memoria in care se va retine imaginea in forma liniarizata */
-        image->data = calloc(numBytes, sizeof(*image->data));
-        ASSERT(
-            image->data == NULL,
-            fclose(inputStream),
-            "Unable to allocate memory for the image.\n",
-            PNM_NO_MEMORY;
-        );
-
-        /* Se citesc datele ce constituie pixelii imaginii linie cu linie*/
-        for (i = 0; i != image->height; ++i, offsetData += rowWidth)
-        {
-            retval = fread(
-                image->data + offsetData,
-                sizeof(*image->data),
-                image->width,
-                inputStream
-            );
-            ASSERT(
-                retval != image->width,
-                fclose(inputStream); free(image->data),
-                "Unable to read image file data.\n",
-                PNM_NO_DATA;
-            );
-        }
+        numBytes = rowWidth * (image->height + 2);
     } else
     {
-        image->data = NULL;
+        numBytes = rowWidth * (usedHeight + 2);
+    }
+
+    /* Se aloca memoria in care se va retine imaginea in forma liniarizata */
+    image->data = calloc(numBytes, sizeof(*image->data));
+    ASSERT(
+        image->data == NULL,
+        fclose(inputStream),
+        "Unable to allocate memory for the image.\n",
+        PNM_NO_MEMORY;
+    );
+
+    fseek(inputStream, rank * linesChunk * image->width, SEEK_CUR);
+
+    /* Se citesc datele ce constituie pixelii imaginii linie cu linie*/
+    for (i = 0; i != usedHeight; ++i, offsetData += rowWidth)
+    {
+        retval = fread(
+            image->data + offsetData,
+            sizeof(*image->data),
+            image->width,
+            inputStream
+        );
+        ASSERT(
+            retval != image->width,
+            fclose(inputStream); free(image->data),
+            "Unable to read image file data.\n",
+            PNM_NO_DATA;
+        );
     }
 
     fclose(inputStream);
-    image->width     += 2 * stride;
-    image->height    += 2;
+    image->width    += 2 * stride;
+    image->height   += 2;
 
     return PNM_OK;
 }
@@ -228,7 +237,6 @@ PNM_STATUS applyFilter(
         for (j = stride; j != rowWidth; ++j)
         {
             pos = i * outputImage->width + j;
-
             outputImage->data[pos] = applyConvolution(
                 inputData,
                 filter,

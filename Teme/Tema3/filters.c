@@ -72,8 +72,8 @@ FILTER_STATUS getFilter(double* filter, char* type)
     } else if (!strcmp(type, "emboss"))
     {
         memset(filter, 0.f, 9 * sizeof(*filter));
-        filter[1] = 1.0;
-        filter[7] = -1.0;
+        filter[1] = -1.0;
+        filter[7] = 1.0;
     } else
     {
         memset(filter, 0.f, 9 * sizeof(*filter));

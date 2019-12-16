@@ -4,7 +4,7 @@ MPI=mpirun
 MPIFLAGS=-lm
 
 NP=12  # sarakilor
-FilterTypes=smooth
+FilterTypes=smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth smooth 
 InputFile=input_files/PNM/macro.pnm
 OutputFile=macro_emboss.pnm
 

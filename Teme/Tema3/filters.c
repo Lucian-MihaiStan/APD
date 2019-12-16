@@ -1,6 +1,6 @@
 #include "filters.h"
 
-FILTER_STATUS getFilter(float* filter, char* type)
+FILTER_STATUS getFilter(double* filter, char* type)
 {
     ASSERT(
         filter == NULL || type == NULL,
@@ -19,7 +19,7 @@ FILTER_STATUS getFilter(float* filter, char* type)
     {
         for (i = 0; i != 9; ++i)
         {
-            filter[i] = 1.f / 9.f;
+            filter[i] = 1.0 / 9.0;
         }
     } else if (!strcmp(type, "blur"))
     {
@@ -27,15 +27,15 @@ FILTER_STATUS getFilter(float* filter, char* type)
         {
             if (i & 1)
             {
-                filter[i] = .0625f;
+                filter[i] = .0625;
             } else
             {
                 if (i == 4)
                 {
-                    filter[i] = .25f;
+                    filter[i] = .25;
                 } else
                 {
-                    filter[i] = .125f;
+                    filter[i] = .125;
                 }
             } 
         }
@@ -45,15 +45,15 @@ FILTER_STATUS getFilter(float* filter, char* type)
         {
             if (i & 1)
             {
-                filter[i] = -2.f / 3.f;
+                filter[i] = -2.0 / 3.0;
             } else
             {
                 if (i == 4)
                 {
-                    filter[i] = 11.f / 3.f;
+                    filter[i] = 11.0 / 3.0;
                 } else
                 {
-                    filter[i] = 0.f;
+                    filter[i] = 0.0;
                 }
             } 
         }
@@ -63,21 +63,21 @@ FILTER_STATUS getFilter(float* filter, char* type)
         {
             if (i == 4)
             {
-                filter[i] = 9.f;
+                filter[i] = 9.0;
             } else
             {
-                filter[i] = -1.f;
+                filter[i] = -1.0;
             } 
         }
     } else if (!strcmp(type, "emboss"))
     {
         memset(filter, 0.f, 9 * sizeof(*filter));
-        filter[1] = -1.f;
-        filter[7] = 1.f;
+        filter[1] = 1.0;
+        filter[7] = -1.0;
     } else
     {
         memset(filter, 0.f, 9 * sizeof(*filter));
-        filter[4] = 1.f;
+        filter[4] = 1.0;
     }
 
     return FILTER_OK;

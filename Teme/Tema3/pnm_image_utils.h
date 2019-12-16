@@ -42,7 +42,7 @@ typedef struct
 PNM_STATUS readImage(
     const char* imageFile,
     PNM_IMAGE* image,
-    uint8_t wholeImage
+    const uint8_t wholeImage
 );
 
 /**
@@ -67,7 +67,7 @@ PNM_STATUS writeImage(
 PNM_STATUS applyFilter(
     PNM_IMAGE* outputImage,
     const uint8_t* inputData,
-    const float* filter
+    const double* filter
 );
 
 #endif  /* !PNM_IMAGE_UTILS_H */

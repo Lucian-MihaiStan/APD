@@ -4,8 +4,9 @@
 #include <stdio.h>
 
 /**
-    Verifica o conditie si daca aceasta este indeplinita, se efectueaza actiunea
-    data, se afiseaza mesajul dat si returneaza valoarea specificata specificata.
+*   Verifica o conditie si daca aceasta este indeplinita, se efectueaza actiunea
+*   data, se afiseaza mesajul dat si returneaza valoarea specificata specificata.
+*   E practic un `DIE` modificat.
 */
 #define ASSERT(condition, action, msg, retVal)          \
     do                                          		\
@@ -17,5 +18,9 @@
             return retVal;                      		\
         }                                       		\
     } while (0)
+
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 #endif

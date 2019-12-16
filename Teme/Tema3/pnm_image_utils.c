@@ -3,7 +3,7 @@
 PNM_STATUS readImage(
     const char* imageFile,
     PNM_IMAGE* image,
-    uint8_t wholeImage
+    const uint8_t wholeImage
 )
 {
     /* Se verifica daca parametrii dati functiei sunt valizi */
@@ -166,15 +166,15 @@ PNM_STATUS writeImage(
 }
 
 static inline uint8_t applyConvolution(
-    const char* inputData,
-    const float* filter,
+    const uint8_t* inputData,
+    const double* filter,
     const int pos,
     const int width,
     const int stride,
     const uint8_t maxVal
 )
 {
-    float sum = 0;
+    double sum = 0;
 
     /* Convolutia se aplica desfasurat, element cu element */
     sum += inputData[pos - width - stride]  * filter[0];
@@ -188,7 +188,8 @@ static inline uint8_t applyConvolution(
     sum += inputData[pos + width + stride]  * filter[8];
 
     sum = round(sum);
-    sum = sum > maxVal ? maxVal : sum;
+    sum = MIN(sum, maxVal);
+    sum = MAX(sum, 0);
 
     return (uint8_t)sum;
 }
@@ -196,7 +197,7 @@ static inline uint8_t applyConvolution(
 PNM_STATUS applyFilter(
     PNM_IMAGE* outputImage,
     const uint8_t* inputData,
-    const float* filter
+    const double* filter
 )
 {
     ASSERT(
@@ -206,7 +207,7 @@ PNM_STATUS applyFilter(
         PNM_BAD_PARAMS
     );
 
-    int stride, rowWidth, maxRow, rowOffset;
+    int stride, rowWidth, maxRow;
     int i, j, pos;
 
     /* O imagine RGB va avea o latime de 3 ori mai mare */

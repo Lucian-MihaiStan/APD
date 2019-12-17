@@ -19,7 +19,7 @@ FILTER_STATUS getFilter(float* filter, char* type)
     {
         for (i = 0; i != 9; ++i)
         {
-            filter[i] = 1.0 / 9.0;
+            filter[i] = 1.f / 9.f;
         }
     } else if (!strcmp(type, "blur"))
     {
@@ -27,15 +27,15 @@ FILTER_STATUS getFilter(float* filter, char* type)
         {
             if (i & 1)
             {
-                filter[i] = .0625;
+                filter[i] = .0625f;
             } else
             {
                 if (i == 4)
                 {
-                    filter[i] = .25;
+                    filter[i] = .25f;
                 } else
                 {
-                    filter[i] = .125;
+                    filter[i] = .125f;
                 }
             } 
         }
@@ -45,15 +45,15 @@ FILTER_STATUS getFilter(float* filter, char* type)
         {
             if (i & 1)
             {
-                filter[i] = -2.0 / 3.0;
+                filter[i] = -2.f / 3.f;
             } else
             {
                 if (i == 4)
                 {
-                    filter[i] = 11.0 / 3.0;
+                    filter[i] = 11.f / 3.f;
                 } else
                 {
-                    filter[i] = 0.0;
+                    filter[i] = 0.f;
                 }
             } 
         }
@@ -63,21 +63,21 @@ FILTER_STATUS getFilter(float* filter, char* type)
         {
             if (i == 4)
             {
-                filter[i] = 9.0;
+                filter[i] = 9.f;
             } else
             {
-                filter[i] = -1.0;
+                filter[i] = -1.f;
             } 
         }
     } else if (!strcmp(type, "emboss"))
     {
         memset(filter, 0.f, 9 * sizeof(*filter));
-        filter[1] = -1.0;
-        filter[7] = 1.0;
+        filter[1] = -1.f;
+        filter[7] = 1.f;
     } else
     {
         memset(filter, 0.f, 9 * sizeof(*filter));
-        filter[4] = 1.0;
+        filter[4] = 1.f;
     }
 
     return FILTER_OK;

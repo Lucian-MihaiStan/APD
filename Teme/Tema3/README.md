@@ -53,7 +53,7 @@ algoritmul va functiona mai repede decat in cazul unei implementari clasice,
 deoarece toate cele 9 elemente pe care se va aplica operatia de convolutie vor
 putea fi stocate in cacheul procesorului.
 
-Acest comportament se poate observa in exemplul de rulare dat mai jos.
+Acest comportament se poate observa in exemplele de rulare date mai jos.
 
 ## Scalare
 S-a incercat minimizarea numarului de mesaje interschimbate de procese si
@@ -61,9 +61,10 @@ deblocarea cat mai rapida in momentul in care trebuie ca acestea sa-si trimita
 liniile de inceput si final. Astfel, ruland scriptul `test_scaling.sh` pe un
 **Intel i7-8700K @ 4.2Ghz** se pot observa urmatoarele:
 
-Pentru evaluarea algoritmului se va folosi cea mai mare poza disponibila:
-landscape.pnm (3840x2160).
+Pentru evaluarea algoritmului se vor folosi cele mai mari poze disponibile:
+landscape.pnm (3840x2160) si rorshcach.pgm (3853x2000).
 
+Pentru landscape.pnm se obtin urmatorii timpi:
 ```
 teo@obor Tema3 $ ./test_scaling.sh input_files/PNM/landscape.pnm landscape_smooth.pnm
 rm -f tema3 *.o .fuse_hidden* *.pgm *.pnm
@@ -75,53 +76,116 @@ mpicc -Wall -Wextra -Wpedantic image_processing.c -c
 mpicc tema3.o pnm_image_utils.o filters.o image_processing.o -o tema3 -lm
 
 Testare cu NP = 1
-152.58user 0.13system 2:33.08elapsed 99%CPU (0avgtext+0avgdata 59628maxresident)k
-72848inputs+16408outputs (118major+17380minor)pagefaults 0swaps
+153.11user 0.12system 2:33.53elapsed 99%CPU (0avgtext+0avgdata 59660maxresident)k
+48608inputs+16408outputs (4major+17379minor)pagefaults 0swaps
 
 Testare cu NP = 2
-152.68user 0.08system 1:16.64elapsed 199%CPU (0avgtext+0avgdata 36612maxresident)k
-24inputs+17392outputs (12major+22042minor)pagefaults 0swaps
+156.81user 0.10system 1:18.72elapsed 199%CPU (0avgtext+0avgdata 36632maxresident)k
+0inputs+17344outputs (12major+22018minor)pagefaults 0swaps
 
 Testare cu NP = 3
-157.17user 0.09system 0:52.73elapsed 298%CPU (0avgtext+0avgdata 36492maxresident)k
-0inputs+17656outputs (14major+24416minor)pagefaults 0swaps
+152.62user 0.12system 0:51.20elapsed 298%CPU (0avgtext+0avgdata 36664maxresident)k
+0inputs+17680outputs (15major+24423minor)pagefaults 0swaps
 
 Testare cu NP = 4
-154.86user 0.13system 0:39.04elapsed 396%CPU (0avgtext+0avgdata 37004maxresident)k
-0inputs+20144outputs (24major+26597minor)pagefaults 0swaps
+152.44user 0.15system 0:38.43elapsed 397%CPU (0avgtext+0avgdata 37040maxresident)k
+0inputs+20144outputs (24major+26600minor)pagefaults 0swaps
 
 Testare cu NP = 5
-156.82user 0.23system 0:31.71elapsed 495%CPU (0avgtext+0avgdata 37000maxresident)k
-0inputs+21216outputs (31major+28404minor)pagefaults 0swaps
+152.68user 0.16system 0:30.85elapsed 495%CPU (0avgtext+0avgdata 36992maxresident)k
+0inputs+21072outputs (34major+28344minor)pagefaults 0swaps
 
 Testare cu NP = 6
-160.62user 0.23system 0:27.18elapsed 591%CPU (0avgtext+0avgdata 37100maxresident)k
-40inputs+22000outputs (40major+30076minor)pagefaults 0swaps
+152.86user 0.17system 0:25.79elapsed 593%CPU (0avgtext+0avgdata 37276maxresident)k
+0inputs+22000outputs (36major+30072minor)pagefaults 0swaps
 
 Testare cu NP = 7
-200.20user 10.26system 0:30.47elapsed 690%CPU (0avgtext+0avgdata 37172maxresident)k
-0inputs+22720outputs (49major+31544minor)pagefaults 0swaps
+200.05user 11.51system 0:30.53elapsed 692%CPU (0avgtext+0avgdata 37140maxresident)k
+0inputs+22928outputs (46major+31545minor)pagefaults 0swaps
 
 Testare cu NP = 8
-203.28user 7.34system 0:26.67elapsed 789%CPU (0avgtext+0avgdata 37300maxresident)k
-0inputs+24104outputs (55major+33207minor)pagefaults 0swaps
+206.07user 8.43system 0:27.13elapsed 790%CPU (0avgtext+0avgdata 37332maxresident)k
+0inputs+23864outputs (51major+33192minor)pagefaults 0swaps
 
 Testare cu NP = 9
-207.72user 5.15system 0:24.08elapsed 883%CPU (0avgtext+0avgdata 37312maxresident)k
-8inputs+24792outputs (61major+34803minor)pagefaults 0swaps
+205.54user 5.46system 0:23.77elapsed 887%CPU (0avgtext+0avgdata 37380maxresident)k
+0inputs+24792outputs (60major+34800minor)pagefaults 0swaps
 
 Testare cu NP = 10
-210.79user 3.85system 0:21.92elapsed 978%CPU (0avgtext+0avgdata 37448maxresident)k
-0inputs+25720outputs (61major+36295minor)pagefaults 0swaps
+207.43user 3.40system 0:21.40elapsed 984%CPU (0avgtext+0avgdata 37532maxresident)k
+0inputs+25760outputs (64major+36328minor)pagefaults 0swaps
 
 Testare cu NP = 11
-217.53user 3.74system 0:20.65elapsed 1071%CPU (0avgtext+0avgdata 37576maxresident)k
-0inputs+26648outputs (67major+37823minor)pagefaults 0swaps
+211.03user 2.61system 0:19.75elapsed 1081%CPU (0avgtext+0avgdata 37536maxresident)k
+0inputs+26648outputs (77major+37814minor)pagefaults 0swaps
 
 Testare cu NP = 12
-238.75user 8.42system 0:21.68elapsed 1139%CPU (0avgtext+0avgdata 37504maxresident)k
-0inputs+27584outputs (62major+39261minor)pagefaults 0swaps
+220.69user 2.52system 0:18.94elapsed 1178%CPU (0avgtext+0avgdata 37504maxresident)k
+0inputs+27624outputs (81major+39342minor)pagefaults 0swaps
 ```
+
+Pentru rorschach.pgm se obtin urmatorii timpi:
+```
+teo@obor Tema3 $ ./test_scaling.sh input_files/PGM/rorschach.pgm rorschach_smooth.pgm
+rm -f tema3 *.o .fuse_hidden* *.pgm *.pnm
+
+mpicc -Wall -Wextra -Wpedantic tema3.c -c
+mpicc -Wall -Wextra -Wpedantic pnm_image_utils.c -c
+mpicc -Wall -Wextra -Wpedantic filters.c -c
+mpicc -Wall -Wextra -Wpedantic image_processing.c -c
+mpicc tema3.o pnm_image_utils.o filters.o image_processing.o -o tema3 -lm
+
+Testare cu NP = 1
+44.33user 0.04system 0:44.55elapsed 99%CPU (0avgtext+0avgdata 26100maxresident)k
+15056inputs+16408outputs (4major+8980minor)pagefaults 0swaps
+
+Testare cu NP = 2
+44.46user 0.08system 0:22.47elapsed 198%CPU (0avgtext+0avgdata 24872maxresident)k
+24inputs+17200outputs (12major+11490minor)pagefaults 0swaps
+
+Testare cu NP = 3
+44.63user 0.06system 0:15.10elapsed 296%CPU (0avgtext+0avgdata 24820maxresident)k
+0inputs+17576outputs (14major+13206minor)pagefaults 0swaps
+
+Testare cu NP = 4
+44.94user 0.09system 0:11.46elapsed 392%CPU (0avgtext+0avgdata 25152maxresident)k
+0inputs+20032outputs (24major+15019minor)pagefaults 0swaps
+
+Testare cu NP = 5
+45.33user 0.10system 0:09.30elapsed 488%CPU (0avgtext+0avgdata 24936maxresident)k
+0inputs+20928outputs (33major+16568minor)pagefaults 0swaps
+
+Testare cu NP = 6
+45.38user 0.14system 0:07.86elapsed 579%CPU (0avgtext+0avgdata 24796maxresident)k
+0inputs+21824outputs (35major+18139minor)pagefaults 0swaps
+
+Testare cu NP = 7
+60.73user 4.02system 0:09.50elapsed 681%CPU (0avgtext+0avgdata 24856maxresident)k
+0inputs+22720outputs (48major+19548minor)pagefaults 0swaps
+
+Testare cu NP = 8
+61.37user 2.78system 0:08.28elapsed 774%CPU (0avgtext+0avgdata 25176maxresident)k
+0inputs+23624outputs (52major+21047minor)pagefaults 0swaps
+
+Testare cu NP = 9
+61.77user 1.98system 0:07.34elapsed 868%CPU (0avgtext+0avgdata 24856maxresident)k
+0inputs+24520outputs (63major+22581minor)pagefaults 0swaps
+
+Testare cu NP = 10
+63.06user 1.65system 0:06.73elapsed 960%CPU (0avgtext+0avgdata 24976maxresident)k
+0inputs+25416outputs (67major+23973minor)pagefaults 0swaps
+
+Testare cu NP = 11
+63.33user 1.02system 0:06.10elapsed 1053%CPU (0avgtext+0avgdata 24936maxresident)k
+0inputs+26352outputs (69major+25519minor)pagefaults 0swaps
+
+Testare cu NP = 12
+63.87user 0.72system 0:05.66elapsed 1140%CPU (0avgtext+0avgdata 24992maxresident)k
+0inputs+27896outputs (76major+27021minor)pagefaults 0swaps
+```
+
+Ruland scriptul de mai multe ori, media timpilor obtinuti este similara timpilor
+din rularile de mai sus.
 
 Se observa deci o scalare aproape ideala de la 1 la 6 procese, insa pe masura
 ce numarul proceselor creste, dimensiunile partilor din imagine gestionate de

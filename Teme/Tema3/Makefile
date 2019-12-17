@@ -4,7 +4,7 @@ MPI=mpirun
 MPIFLAGS=-lm
 
 NP=12  # sarakilor
-FilterTypes=smooth
+FilterTypes=blur smooth sharpen emboss mean blur smooth sharpen emboss mean
 InputFile=input_files/PNM/baby-yoda.pnm
 OutputFile=baby-yoda_smooth.pnm
 

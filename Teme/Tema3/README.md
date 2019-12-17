@@ -25,7 +25,7 @@ cazuri de eroare ce pot aparea (cele care nu sunt verificate sunt specificate
 in comentariile aferente fiecarei functii).
 
 ### image_processing
-Singura functie non-statica, `processImage()` va calcula pentru fiecare proces
+Singura functie non-statica, `processImage()`, va calcula pentru fiecare proces
 ce linii ii revin acestuia pentru prelucrare, dupa care va aplica efectiv
 filtrele, urmand ca la final sa recompuna toata imaginea in procesul `MASTER`
 care va aduna fragmentele fiecarui alt proces si le va concatena fragmentului
@@ -75,57 +75,57 @@ mpicc -Wall -Wextra -Wpedantic image_processing.c -c
 mpicc tema3.o pnm_image_utils.o filters.o image_processing.o -o tema3 -lm
 
 Testare cu NP = 1
-153.14user 0.09system 2:33.62elapsed 99%CPU (0avgtext+pfff0avgdata 59716maxresident)k
-72848inputs+16408outputs (118major+17381minor)pagefaults 0swaps
+152.58user 0.13system 2:33.08elapsed 99%CPU (0avgtext+0avgdata 59628maxresident)k
+72848inputs+16408outputs (118major+17380minor)pagefaults 0swaps
 
 Testare cu NP = 2
-153.24user 0.13system 1:16.95elapsed 199%CPU (0avgtext+0avgdata 36584maxresident)k
-24inputs+17408outputs (12major+22032minor)pagefaults 0swaps
+152.68user 0.08system 1:16.64elapsed 199%CPU (0avgtext+0avgdata 36612maxresident)k
+24inputs+17392outputs (12major+22042minor)pagefaults 0swaps
 
 Testare cu NP = 3
-155.57user 0.12system 0:52.18elapsed 298%CPU (0avgtext+0avgdata 36656maxresident)k
-0inputs+17736outputs (16major+24440minor)pagefaults 0swaps
+157.17user 0.09system 0:52.73elapsed 298%CPU (0avgtext+0avgdata 36492maxresident)k
+0inputs+17656outputs (14major+24416minor)pagefaults 0swaps
 
 Testare cu NP = 4
-154.81user 0.16system 0:39.02elapsed 397%CPU (0avgtext+0avgdata 36908maxresident)k
-0inputs+20256outputs (22major+26621minor)pagefaults 0swaps
+154.86user 0.13system 0:39.04elapsed 396%CPU (0avgtext+0avgdata 37004maxresident)k
+0inputs+20144outputs (24major+26597minor)pagefaults 0swaps
 
 Testare cu NP = 5
-156.17user 0.20system 0:31.56elapsed 495%CPU (0avgtext+0avgdata 37092maxresident)k
-0inputs+21072outputs (28major+28399minor)pagefaults 0swaps
+156.82user 0.23system 0:31.71elapsed 495%CPU (0avgtext+0avgdata 37000maxresident)k
+0inputs+21216outputs (31major+28404minor)pagefaults 0swaps
 
 Testare cu NP = 6
-160.18user 0.15system 0:27.01elapsed 593%CPU (0avgtext+0avgdata 37076maxresident)k
-0inputs+22000outputs (39major+30093minor)pagefaults 0swaps
+160.62user 0.23system 0:27.18elapsed 591%CPU (0avgtext+0avgdata 37100maxresident)k
+40inputs+22000outputs (40major+30076minor)pagefaults 0swaps
 
 Testare cu NP = 7
-199.68user 10.54system 0:30.34elapsed 692%CPU (0avgtext+0avgdata 37164maxresident)k
-0inputs+22928outputs (46major+31626minor)pagefaults 0swaps
+200.20user 10.26system 0:30.47elapsed 690%CPU (0avgtext+0avgdata 37172maxresident)k
+0inputs+22720outputs (49major+31544minor)pagefaults 0swaps
 
 Testare cu NP = 8
-204.24user 7.73system 0:26.84elapsed 789%CPU (0avgtext+0avgdata 37336maxresident)k
-0inputs+24104outputs (54major+33253minor)pagefaults 0swaps
+203.28user 7.34system 0:26.67elapsed 789%CPU (0avgtext+0avgdata 37300maxresident)k
+0inputs+24104outputs (55major+33207minor)pagefaults 0swaps
 
 Testare cu NP = 9
-207.37user 5.31system 0:24.03elapsed 884%CPU (0avgtext+0avgdata 37352maxresident)k
-0inputs+24792outputs (57major+34741minor)pagefaults 0swaps
+207.72user 5.15system 0:24.08elapsed 883%CPU (0avgtext+0avgdata 37312maxresident)k
+8inputs+24792outputs (61major+34803minor)pagefaults 0swaps
 
 Testare cu NP = 10
-209.79user 3.26system 0:21.71elapsed 980%CPU (0avgtext+0avgdata 37344maxresident)k
-0inputs+25720outputs (45major+36290minor)pagefaults 0swaps
+210.79user 3.85system 0:21.92elapsed 978%CPU (0avgtext+0avgdata 37448maxresident)k
+0inputs+25720outputs (61major+36295minor)pagefaults 0swaps
 
 Testare cu NP = 11
-228.53user 6.42system 0:22.23elapsed 1056%CPU (0avgtext+0avgdata 37384maxresident)k
-0inputs+26688outputs (62major+37726minor)pagefaults 0swaps
+217.53user 3.74system 0:20.65elapsed 1071%CPU (0avgtext+0avgdata 37576maxresident)k
+0inputs+26648outputs (67major+37823minor)pagefaults 0swaps
 
 Testare cu NP = 12
-255.27user 13.21system 0:24.05elapsed 1116%CPU (0avgtext+0avgdata 37504maxresident)k
-0inputs+27624outputs (57major+39288minor)pagefaults 0swaps
+238.75user 8.42system 0:21.68elapsed 1139%CPU (0avgtext+0avgdata 37504maxresident)k
+0inputs+27584outputs (62major+39261minor)pagefaults 0swaps
 ```
 
 Se observa deci o scalare aproape ideala de la 1 la 6 procese, insa pe masura
 ce numarul proceselor creste, dimensiunile partilor din imagine gestionate de
 fiecare dintre acestea scad, in timp ce dimensiunea mesajelor pe care procesele
-le schimba intre ele pe masura ce aplica filtrele ramane constanta. Prin urmare,
+le schimba intre ele inainte sa aplice filtrele ramane constanta. Prin urmare,
 necesitatea acestor sincronizari va crea o latenta din ce in ce mai mare relativ
 la dimensiunea datelor fiecarui proces.

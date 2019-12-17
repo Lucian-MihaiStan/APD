@@ -176,14 +176,14 @@ PNM_STATUS writeImage(
 
 static inline uint8_t applyConvolution(
     const uint8_t* inputData,
-    const double* filter,
+    const float* filter,
     const int pos,
     const int width,
     const int stride,
     const uint8_t maxVal
 )
 {
-    double sum = 0;
+    float sum = 0;
 
     /* Convolutia se aplica desfasurat, element cu element */
     sum += inputData[pos - width - stride]  * filter[0];
@@ -206,7 +206,7 @@ static inline uint8_t applyConvolution(
 PNM_STATUS applyFilter(
     PNM_IMAGE* outputImage,
     const uint8_t* inputData,
-    const double* filter
+    const float* filter
 )
 {
     ASSERT(

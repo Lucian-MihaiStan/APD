@@ -24,7 +24,6 @@
 
 typedef int PNM_STATUS;
 
-
 /**
 *   Structura in care se va retine imaginea.
 */
@@ -71,7 +70,7 @@ PNM_STATUS writeImage(
 PNM_STATUS applyFilter(
     PNM_IMAGE* outputImage,
     const uint8_t* inputData,
-    const double* filter
+    const float* filter
 );
 
 #endif  /* !PNM_IMAGE_UTILS_H */

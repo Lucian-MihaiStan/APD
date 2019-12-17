@@ -1,6 +1,6 @@
 #include "filters.h"
 
-FILTER_STATUS getFilter(double* filter, char* type)
+FILTER_STATUS getFilter(float* filter, char* type)
 {
     ASSERT(
         filter == NULL || type == NULL,

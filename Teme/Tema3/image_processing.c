@@ -23,7 +23,7 @@ static PNM_STATUS applyFilters(
 
     int retVal, i;
     uint8_t* aux;
-    double filter[9];
+    float filter[9];
 
     int lastLinePos = image->width * (image->height - 2);
     uint8_t* data   = malloc(usedBytes * sizeof(*data));

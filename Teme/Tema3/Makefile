@@ -28,6 +28,9 @@ image_processing.o: image_processing.c
 	$(CC) $(CFLAGS) $^ -c
 
 run_tema3: tema3
+	time $(MPI) -np $(NP) $< $(InputFile) $(OutputFile) $(FilterTypes)
+
+run_tema3_quiet: tema3
 	@time $(MPI) -np $(NP) $< $(InputFile) $(OutputFile) $(FilterTypes)
 
 clean:

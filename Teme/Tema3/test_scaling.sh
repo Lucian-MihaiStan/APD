@@ -25,6 +25,6 @@ echo ""
 
 for numProc in "${NPs[@]}"; do
 	echo "Testare cu NP = ${numProc}"
-	make run_tema3 InputFile=$INPUT_FILE OutputFile="${numProc}_processes_${OUTPUT_FILE}" NP=$numProc FilterTypes="${filters}"
+	make run_tema3_quiet InputFile=$INPUT_FILE OutputFile="${numProc}_processes_${OUTPUT_FILE}" NP=$numProc FilterTypes="${filters}"
 	echo ""
 done

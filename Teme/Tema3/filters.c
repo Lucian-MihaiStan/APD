@@ -27,7 +27,7 @@ FILTER_STATUS getFilter(float* filter, char* type)
         {
             if (i & 1)
             {
-                filter[i] = .0625f;
+                filter[i] = .125f;
             } else
             {
                 if (i == 4)
@@ -35,7 +35,7 @@ FILTER_STATUS getFilter(float* filter, char* type)
                     filter[i] = .25f;
                 } else
                 {
-                    filter[i] = .125f;
+                    filter[i] = .0625f;
                 }
             } 
         }
@@ -53,7 +53,7 @@ FILTER_STATUS getFilter(float* filter, char* type)
                     filter[i] = 11.f / 3.f;
                 } else
                 {
-                    filter[i] = 0.f;
+                    filter[i] = 0.f / 3.f;
                 }
             } 
         }

@@ -6,7 +6,7 @@ MPIFLAGS=-lm
 NP=12  # sarakilor
 FilterTypes=blur smooth sharpen emboss mean blur smooth sharpen emboss mean
 InputFile=input_files/PNM/baby-yoda.pnm
-OutputFile=baby-yoda_smooth.pnm
+OutputFile=baby-yoda_bssembssem.pnm
 
 .PHONY: build clean
 

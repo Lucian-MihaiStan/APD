@@ -23,8 +23,8 @@ int main(int argc, char** argv)
     {
         retVal = writeImage(
             &image,
-            "# Free Chilipirea!",
-            argv[2]
+            argv[2],
+            "# Free Chilipirea!"
         );
         ASSERT(
             retVal != PNM_OK,

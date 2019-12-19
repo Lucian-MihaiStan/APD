@@ -32,12 +32,11 @@ PNM_STATUS readImage(
         PNM_UNKNOWN_FORMAT;
     );
 
-    char title[MAX_TITLE_LENGTH];
     int stride, numBytes, offsetData, rowWidth;
     int i, retval;
 
     /* Se citesc metadatele imaginii */
-    fgets(title, MAX_TITLE_LENGTH, inputStream);
+    fgets(image->title, MAX_TITLE_LENGTH, inputStream);
     fscanf(inputStream, "%d %d\n", &image->width, &image->height);
     fscanf(inputStream, "%hhu\n", &image->maxVal);
 
@@ -104,13 +103,13 @@ PNM_STATUS readImage(
 
 PNM_STATUS writeImage(
     PNM_IMAGE* image,
-    const char* title,
-    const char* outputFile
+    const char* outputFile,
+    const char* title
 )
 {
     /* Verificare ca parametrii sa nu fie nuli */
     ASSERT(
-        image == NULL || title == NULL || outputFile == NULL,
+        image == NULL || outputFile == NULL,
         ,
         "[writeImage] Received null pointer parameters.\n",
         PNM_BAD_PARAMS
@@ -141,12 +140,21 @@ PNM_STATUS writeImage(
     offsetData  = image->width + stride;
     maxRow      = image->height - 2;
 
+    /**
+    * Daca functiei i s-a dat si un titlu pentru imagine, acesta suprascrie
+    * vechiul titlu 
+    */
+    if (title != NULL)
+    {
+        snprintf(image->title, MAX_TITLE_LENGTH, "%s\n", title);
+    }
+
     /* Se scrie antetul imaginii */
     fprintf(
         outputStream,
-        "%s%s\n%d %d\n%d\n",
+        "%s%s%d %d\n%d\n",
         image->format,
-        title,
+        image->title,
         rowWidth / stride,
         maxRow,
         image->maxVal
@@ -196,7 +204,6 @@ static inline uint8_t applyConvolution(
     sum += inputData[pos + width]           * filter[7];
     sum += inputData[pos + width + stride]  * filter[8];
 
-    sum = round(sum);
     sum = MIN(sum, maxVal);
     sum = MAX(sum, 0);
 

@@ -50,14 +50,15 @@ PNM_STATUS readImage(
 
 /**
 *   Scrie imaginea bordata data ca parametru intr-un fisier.
-*   De asemenea, adauga un titlu imaginii.
+*   De asemenea, daca parametrul `title` nu este nul, acesta devine nout titlu
+*   al imaginii.
 *   Atat filtrul cat si imaginea sunt liniarizate.
 *   Se presupune ca imaginea are un format corect.
 */
 PNM_STATUS writeImage(
     PNM_IMAGE* image,
-    const char* title,
-    const char* outputFile
+    const char* outputFile,
+    const char* title
 );
 
 /**

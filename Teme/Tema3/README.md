@@ -58,7 +58,7 @@ Acest comportament se poate observa in exemplele de rulare date mai jos.
 ## Scalare
 S-a incercat minimizarea numarului de mesaje interschimbate de procese si
 deblocarea cat mai rapida in momentul in care trebuie ca acestea sa-si trimita
-liniile de inceput si final. Astfel, ruland scriptul `test_scaling.sh` pe un
+liniile de inceput si final. Astfel, ruland scriptul `test_scalability.sh` pe un
 **Intel i7-8700K @ 4.2Ghz** se pot observa urmatoarele:
 
 Pentru evaluarea algoritmului se vor folosi cele mai mari poze disponibile:
@@ -66,7 +66,7 @@ landscape.pnm (3840x2160) si rorshcach.pgm (3853x2000).
 
 Pentru landscape.pnm se obtin urmatorii timpi:
 ```
-teo@obor Tema3 $ ./test_scaling.sh input_files/PNM/landscape.pnm landscape_smooth.pnm
+teo@obor Tema3 $ ./test_scalability.sh input_files/PNM/landscape.pnm landscape_smooth.pnm
 rm -f tema3 *.o .fuse_hidden* *.pgm *.pnm
 
 mpicc -Wall -Wextra -Wpedantic tema3.c -c
@@ -126,7 +126,7 @@ Testare cu NP = 12
 
 Pentru rorschach.pgm se obtin urmatorii timpi:
 ```
-teo@obor Tema3 $ ./test_scaling.sh input_files/PGM/rorschach.pgm rorschach_smooth.pgm
+teo@obor Tema3 $ ./test_scalability.sh input_files/PGM/rorschach.pgm rorschach_smooth.pgm
 rm -f tema3 *.o .fuse_hidden* *.pgm *.pnm
 
 mpicc -Wall -Wextra -Wpedantic tema3.c -c
@@ -187,9 +187,10 @@ Testare cu NP = 12
 Ruland scriptul de mai multe ori, media timpilor obtinuti este similara timpilor
 din rularile de mai sus.
 
-Se observa deci o scalare aproape ideala de la 1 la 6 procese, insa pe masura
-ce numarul proceselor creste, dimensiunile partilor din imagine gestionate de
-fiecare dintre acestea scad, in timp ce dimensiunea mesajelor pe care procesele
-le schimba intre ele inainte sa aplice filtrele ramane constanta. Prin urmare,
-necesitatea acestor sincronizari va crea o latenta din ce in ce mai mare relativ
-la dimensiunea datelor fiecarui proces.
+Se observa deci o scalare aproape ideala de la 1 la 6 procese (numarul de nuclee
+fizice ale procesorului), insa pe masura ce numarul proceselor creste,
+dimensiunile partilor din imagine gestionate de fiecare dintre acestea scad, in
+timp ce dimensiunea mesajelor pe care procesele le schimba intre ele inainte sa
+aplice filtrele ramane constanta. Prin urmare, necesitatea acestor sincronizari
+va crea o latenta din ce in ce mai mare relativ la dimensiunea datelor fiecarui
+proces.

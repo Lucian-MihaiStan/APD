@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     MPI_Comm_size(MPI_COMM_WORLD, &numProc);
 
     /* Procesele citesc fiecare cate o bucata din imagine */
-    retVal = readImage(&image, argv[1], rank, numProc);
+    retVal = readImage(&image, argv[1], rank);
     ASSERT(retVal != PNM_OK, MPI_Finalize(), " ", retVal);
 
     /* Se trimit, proceseaza si recompun datele */

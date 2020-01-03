@@ -102,6 +102,74 @@ static PNM_STATUS applyFilters(
 }
 
 /**
+*   Trimite datele de la MASTER catre toate celelalte procese.
+*/
+static PNM_STATUS scatterData(
+    PNM_IMAGE* image,
+    int rank,
+    int numProc,
+    int chunkSize,
+    int numBytesScatter
+)
+{
+    int i;
+
+    if (rank != MASTER)
+    {
+        /* Procesele aloca memorie pentru datele pe care mai apoi le primesc */
+        image->data = malloc((chunkSize + 2 * image->width) * sizeof(*image->data));
+        ASSERT(
+            image->data == NULL,
+            ,
+            "Unable to allocate memory for image data.\n",
+            PNM_NO_MEMORY
+        );
+
+        MPI_Recv(
+            image->data + image->width,
+            numBytesScatter,
+            MPI_CHAR,
+            MASTER,
+            MPI_ANY_TAG,
+            MPI_COMM_WORLD,
+            MPI_STATUS_IGNORE
+        );
+
+    } else if (numProc > 1)
+    {
+        --numProc;
+
+        /* Se trimit datele tuturor proceselor mai putin ultimului */
+        for (i = 1; i != numProc; ++i)
+        {
+            MPI_Send(
+                image->data + i * chunkSize + image->width,
+                chunkSize,
+                MPI_CHAR,
+                i,
+                MPI_TAG_UB,
+                MPI_COMM_WORLD
+            );
+        }
+
+        /**
+        * Ultimul proces va avea in general mai putine date, care i se trimit
+        * separat
+        */
+        MPI_Send(
+            image->data + numProc * chunkSize + image->width,
+            image->height * image->width - numProc * chunkSize - image->width,
+            MPI_CHAR,
+            numProc,
+            MPI_TAG_UB,
+            MPI_COMM_WORLD
+        );
+    }
+
+    return PNM_OK;
+}
+
+/**
 *   MASTER primeste datele de la toate celelalte procese.
 */
 static void gatherData(
@@ -109,7 +177,7 @@ static void gatherData(
     int rank,
     int numProc,
     int chunkSize,
-    int numBytesGather
+    int numBytesTransfer
 )
 {
     int i;
@@ -119,7 +187,7 @@ static void gatherData(
         /* Procesele trimit datele lor prelucrate catre MASTER */
         MPI_Send(
             image->data + image->width,
-            numBytesGather,
+            numBytesTransfer,
             MPI_CHAR,
             MASTER,
             MPI_TAG_UB,
@@ -175,7 +243,7 @@ PNM_STATUS processImage(
         PNM_BAD_PARAMS
     );
 
-    int numBytesGather, usedBytes, retVal;
+    int numBytesTransfer, usedBytes, retVal;
 
     /**
     * Fiecare proces calculeaza portiunea de imagine pe care va aplica
@@ -190,15 +258,13 @@ PNM_STATUS processImage(
     /* Se calculeaza parametrii necesari procesarii */
     if (rank != numProc - 1)
     {
-        numBytesGather = chunkSize;
+        numBytesTransfer = chunkSize;
     } else
     {
-        numBytesGather = initialHeight * image->width
+        numBytesTransfer = initialHeight * image->width
                          - (numProc - 1) * chunkSize
                          - image->width;
     }
-
-    image->height = end - start;
 
     /* Se calculeaza numarul de octeti care vor fi folositi de fiecare proces */
     if (rank == MASTER)
@@ -209,6 +275,11 @@ PNM_STATUS processImage(
         usedBytes = image->height * image->width;
     }
 
+    retVal = scatterData(image, rank, numProc, chunkSize, numBytesTransfer);
+    ASSERT(retVal != PNM_OK, , " ", retVal);
+
+    image->height = end - start;
+
     /* Se face procesarea efectiva */
     retVal = applyFilters(image, rank, numProc, usedBytes, argc, argv);
     ASSERT(retVal != PNM_OK, , " ", retVal);
@@ -216,7 +287,7 @@ PNM_STATUS processImage(
     image->height = initialHeight;
 
     /* Se primesc datele procesate de la toate procesele */ 
-    gatherData(image, rank, numProc, chunkSize, numBytesGather);
+    gatherData(image, rank, numProc, chunkSize, numBytesTransfer);
 
     return PNM_OK;
 }

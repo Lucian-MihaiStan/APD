@@ -66,7 +66,7 @@ landscape.pnm (3840x2160) si rorshcach.pgm (3853x2000).
 
 Pentru landscape.pnm se obtin urmatorii timpi:
 ```
-teo@obor Tema3 $ ./test_scalability.sh input_files/PNM/landscape.pnm landscape_smooth.pnm
+teo@obor Tema3 $ ./test_scalability.sh input_files/PNM/landscape.pnm landscape_smooth.pnm 200 12
 rm -f tema3 *.o .fuse_hidden* *.pgm *.pnm
 
 mpicc -Wall -Wextra -Wpedantic tema3.c -c
@@ -126,7 +126,7 @@ Testare cu NP = 12
 
 Pentru rorschach.pgm se obtin urmatorii timpi:
 ```
-teo@obor Tema3 $ ./test_scalability.sh input_files/PGM/rorschach.pgm rorschach_smooth.pgm
+teo@obor Tema3 $ ./test_scalability.sh input_files/PGM/rorschach.pgm rorschach_smooth.pgm 200 12
 rm -f tema3 *.o .fuse_hidden* *.pgm *.pnm
 
 mpicc -Wall -Wextra -Wpedantic tema3.c -c
@@ -187,10 +187,16 @@ Testare cu NP = 12
 Ruland scriptul de mai multe ori, media timpilor obtinuti este similara timpilor
 din rularile de mai sus.
 
+### Concluzie
 Se observa deci o scalare aproape ideala de la 1 la 6 procese (numarul de nuclee
 fizice ale procesorului), insa pe masura ce numarul proceselor creste,
 dimensiunile partilor din imagine gestionate de fiecare dintre acestea scad, in
 timp ce dimensiunea mesajelor pe care procesele le schimba intre ele inainte sa
-aplice filtrele ramane constanta. Prin urmare, necesitatea acestor sincronizari
-va crea o latenta din ce in ce mai mare relativ la dimensiunea datelor fiecarui
-proces.
+aplice filtrele ramane constanta. Pe deasupra, atunci cand se executa mai mult
+de un proces pe un nucleu, se pierde localitatea spatiala a datelor din cacheul
+respectivului nucleu, ceea ce va genera multe *missuri*.
+
+Prin urmare, necesitatea sincronizarilor mentionate mai sus, precum si timpii
+mari de cautare in memorie vor crea o latenta din ce in ce mai mare relativ la
+dimensiunea datelor fiecarui proces, motiv pentru care timpii de rulare scad sub
+valorile celor pentru 6 procese, abia cand se folosesc 9 procese.

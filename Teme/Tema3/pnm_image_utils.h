@@ -44,8 +44,7 @@ typedef struct
 PNM_STATUS readImage(
     PNM_IMAGE* image,
     const char* imageFile,
-    const int rank,
-    const int numProc
+    const int rank
 );
 
 /**

@@ -14,6 +14,17 @@ PNM_STATUS readImage(
         PNM_BAD_PARAMS
     );
 
+    /*
+    * Doar procesul MASTER citeste datele.
+    * Celelalte le vor primi de la acesta.
+    */
+    if (rank != MASTER)
+    {
+        image->data = NULL;
+
+        return PNM_OK;
+    }
+
     /* Se deschide fisierul de input */
     FILE* inputStream = fopen(imageFile, "rt");
     ASSERT(
@@ -49,44 +60,34 @@ PNM_STATUS readImage(
         stride          = 1;
     }
 
-    /*
-    * Doar procesul MASTER citeste pixelii imaginii.
-    * Celelalte vor primi datele de la acesta.
-    */
-    if (rank == MASTER)
-    {
-        rowWidth    = image->width + 2 * stride;
-        numBytes    = rowWidth * (image->height + 2);
-        offsetData  = rowWidth + stride;
+    rowWidth    = image->width + 2 * stride;
+    numBytes    = rowWidth * (image->height + 2);
+    offsetData  = rowWidth + stride;
 
-        /* Se aloca memoria in care se va retine imaginea in forma liniarizata */
-        image->data = calloc(numBytes, sizeof(*image->data));
-        ASSERT(
-            image->data == NULL,
-            fclose(inputStream),
-            "Unable to allocate memory for the image.\n",
-            PNM_NO_MEMORY;
+    /* Se aloca memoria in care se va retine imaginea in forma liniarizata */
+    image->data = calloc(numBytes, sizeof(*image->data));
+    ASSERT(
+        image->data == NULL,
+        fclose(inputStream),
+        "Unable to allocate memory for the image.\n",
+        PNM_NO_MEMORY;
+    );
+
+    /* Se citesc datele ce constituie pixelii imaginii linie cu linie*/
+    for (i = 0; i != image->height; ++i, offsetData += rowWidth)
+    {
+        retval = fread(
+            image->data + offsetData,
+            sizeof(*image->data),
+            image->width,
+            inputStream
         );
-
-        /* Se citesc datele ce constituie pixelii imaginii linie cu linie*/
-        for (i = 0; i != image->height; ++i, offsetData += rowWidth)
-        {
-            retval = fread(
-                image->data + offsetData,
-                sizeof(*image->data),
-                image->width,
-                inputStream
-            );
-            ASSERT(
-                retval != image->width,
-                fclose(inputStream); free(image->data),
-                "Unable to read image file data.\n",
-                PNM_NO_DATA;
-            );
-        }
-    } else
-    {
-        image->data = NULL;
+        ASSERT(
+            retval != image->width,
+            fclose(inputStream); free(image->data),
+            "Unable to read image file data.\n",
+            PNM_NO_DATA;
+        );
     }
 
     fclose(inputStream);

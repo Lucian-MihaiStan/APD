@@ -228,6 +228,16 @@ static void gatherData(
     }
 }
 
+/* Procesul MASTER trimite metadatele catre celelalte procese */
+static void broadcastMetadata(PNM_IMAGE* image)
+{
+    
+    MPI_Bcast(image->format, FORMAT_LENGTH, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&image->maxVal, 1, MPI_CHAR, MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&image->height, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&image->width, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
+}
+
 PNM_STATUS processImage(
     PNM_IMAGE* image,
     int rank,
@@ -244,6 +254,8 @@ PNM_STATUS processImage(
     );
 
     int numBytesTransfer, usedBytes, retVal;
+
+    broadcastMetadata(image);
 
     /**
     * Fiecare proces calculeaza portiunea de imagine pe care va aplica

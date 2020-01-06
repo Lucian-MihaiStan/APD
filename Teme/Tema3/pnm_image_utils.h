@@ -39,7 +39,7 @@ typedef struct
 /**
 *   Citeste o imagine iar datele sunt puse intr-o structura de tip PNM_IMAGE.
 *   Imaginea este salvata gata bordata.
-*   Fiecare proces va citi doar o portiune din imagine.
+*   Doar procesul MASTER va citi imaginea.
 */
 PNM_STATUS readImage(
     PNM_IMAGE* image,

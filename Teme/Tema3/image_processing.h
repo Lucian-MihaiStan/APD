@@ -7,7 +7,7 @@
 #include "filters.h"
 
 /**
-*	Imparte imaginea de la procesul MASTER la toate celelalte si aplica filtrele
+*	Imparte imaginea procesului MASTER tuturor celorlalte si aplica filtrele
 *	date pe aceasta.
 *	La final, aduna imaginile tuturor proceselor in cea a procesulul MASTER.
 */

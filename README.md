@@ -25,6 +25,7 @@ pentru sortare si calculare de polinom + rank sort
 ## Teme
 1. **POSIX**: *DFT* si *FFT*
 2. **Java**: Explorare de graf prin calculare de hashuri
+3. **MPI**: Procesare de imagini prin aplicare de filtre
 
 ## Test
-Colocviul final
+Colocviul final - inmultire paralela de matrice in *Java*
